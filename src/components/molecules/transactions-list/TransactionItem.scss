@@ -1,5 +1,5 @@
 .m-transactionsList-item {
-  @apply block;
+  @apply block relative;
 
   &:hover {
     @apply bg-gray-50;
@@ -36,5 +36,9 @@
     &.mod-purple {
       @apply border-purple-700;
     }
+  }
+
+  &-selectedIcon {
+    @apply text-green-600 absolute bottom-2 right-4;
   }
 }

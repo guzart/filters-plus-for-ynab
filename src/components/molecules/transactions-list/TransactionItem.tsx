@@ -31,7 +31,7 @@ function TransactionsListItem(props: Props) {
   ) : null
 
   const selectedElement = isSelected ? (
-    <div className="text-green-600">
+    <div className="m-transactionsList-item-selectedIcon">
       <Icon name="circleCheck" />
     </div>
   ) : null
