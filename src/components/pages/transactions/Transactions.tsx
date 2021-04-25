@@ -133,9 +133,36 @@ function Transactions(props: Props) {
     localStorage.setItem(storageKeys.selectedTransactions, JSON.stringify(Array.from(selectedTransactionIds)))
   }, [fromDate, toDate, showTransfers, selectedAccountIds, selectedCategoryIds, selectedTransactionIds])
 
-  if (!categoryGroups || !accounts || !transactions) {
-    return <span>Loading...</span>
-  }
+  const filteredTransactions: t.TransactionSummary[] = useMemo(() => {
+    if (!transactions) {
+      return []
+    }
+
+    return transactions.filter((trx) => {
+      if (fromDate && toDate) {
+        const trxTime = new Date(trx.date).getTime()
+        const fromTime = fromDate.getTime()
+        const toTime = toDate.getTime()
+        if (!(fromTime <= trxTime && trxTime <= toTime)) {
+          return false
+        }
+      }
+
+      if (!showTransfers && trx.transfer_account_id) {
+        return false
+      }
+
+      if (!selectedAccountIds.has(trx.account_id)) {
+        return false
+      }
+
+      if (!selectedCategoryIds.has(trx.category_id)) {
+        return false
+      }
+
+      return true
+    })
+  }, [transactions, fromDate, toDate, showTransfers, selectedAccountIds, selectedCategoryIds])
 
   function handleSelectTransaction(transactionId: string) {
     if (selectedTransactionIds.has(transactionId)) {
@@ -149,30 +176,9 @@ function Transactions(props: Props) {
 
   const getCategoryName = (categoryId: string) => categoriesMap.get(categoryId)?.name || categoryId
 
-  const filteredTransactions = transactions.filter((trx) => {
-    if (fromDate && toDate) {
-      const trxTime = new Date(trx.date).getTime()
-      const fromTime = fromDate.getTime()
-      const toTime = toDate.getTime()
-      if (!(fromTime <= trxTime && trxTime <= toTime)) {
-        return false
-      }
-    }
-
-    if (!showTransfers && trx.transfer_account_id) {
-      return false
-    }
-
-    if (!selectedAccountIds.has(trx.account_id)) {
-      return false
-    }
-
-    if (!selectedCategoryIds.has(trx.category_id)) {
-      return false
-    }
-
-    return true
-  })
+  if (!categoryGroups || !accounts || !transactions) {
+    return <span>Loading...</span>
+  }
 
   // Other filters: memo, flags, amount range, payees
   return (
