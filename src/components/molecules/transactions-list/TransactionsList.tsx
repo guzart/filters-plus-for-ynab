@@ -6,15 +6,21 @@ import './TransactionsList.scss'
 
 type Props = PropsWithoutRef<{
   className?: string
-  transactions: t.TransactionSummary[]
   getCategoryName: (categoryId: string) => string
+  onSelect?: (transactionId: string) => void
+  transactions: t.TransactionSummary[]
 }>
 
 function TransactionsList(props: Props) {
   return (
     <ul className={`m-transactionsList ${props.className}`}>
       {props.transactions.map((trx) => (
-        <TransactionsListItem key={trx.id} transaction={trx} getCategoryName={props.getCategoryName} />
+        <TransactionsListItem
+          key={trx.id}
+          transaction={trx}
+          getCategoryName={props.getCategoryName}
+          onClick={(trxId) => props.onSelect?.call(trx, trxId)}
+        />
       ))}
     </ul>
   )

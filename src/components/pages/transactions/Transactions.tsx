@@ -14,8 +14,9 @@ type Props = PropsWithoutRef<{ budgetId: string; client: Client }>
 const storageKeys = {
   accountIds: 'selectedAccountIds',
   categoryIds: 'selectedCategoryIds',
-  fromDate: 'fromDateFilter',
-  toDate: 'toDateFilter',
+  dateRangeFrom: 'fromDateFilter',
+  dateRangeTo: 'toDateFilter',
+  selectedTransactions: 'selectedTransactions',
   showTransfers: 'showTransfersFilter',
 }
 
@@ -57,7 +58,7 @@ function Transactions(props: Props) {
   // Filters
 
   const [fromDate, setFromDate] = useState(() => {
-    const storedFromDate = localStorage.getItem(storageKeys.fromDate)
+    const storedFromDate = localStorage.getItem(storageKeys.dateRangeFrom)
     if (storedFromDate) {
       return new Date(storedFromDate)
     }
@@ -66,7 +67,7 @@ function Transactions(props: Props) {
   })
 
   const [toDate, setToDate] = useState(() => {
-    const storedToDate = localStorage.getItem(storageKeys.toDate)
+    const storedToDate = localStorage.getItem(storageKeys.dateRangeTo)
     if (storedToDate) {
       return new Date(storedToDate)
     }
@@ -101,13 +102,22 @@ function Transactions(props: Props) {
     return new Set<string>([])
   })
 
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState(() => {
+    const storedIds = localStorage.getItem(storageKeys.selectedTransactions)
+    if (storedIds) {
+      return new Set<string>(JSON.parse(storedIds))
+    }
+
+    return new Set<string>([])
+  })
+
   useEffect(() => {
     if (fromDate) {
-      localStorage.setItem(storageKeys.fromDate, fromDate.toISOString())
+      localStorage.setItem(storageKeys.dateRangeFrom, fromDate.toISOString())
     }
 
     if (toDate) {
-      localStorage.setItem(storageKeys.toDate, toDate.toISOString())
+      localStorage.setItem(storageKeys.dateRangeTo, toDate.toISOString())
     }
 
     localStorage.setItem(storageKeys.showTransfers, JSON.stringify(showTransfers))
@@ -115,10 +125,22 @@ function Transactions(props: Props) {
     localStorage.setItem(storageKeys.accountIds, JSON.stringify(Array.from(selectedAccountIds)))
 
     localStorage.setItem(storageKeys.categoryIds, JSON.stringify(Array.from(selectedCategoryIds)))
-  }, [fromDate, toDate, showTransfers, selectedAccountIds, selectedCategoryIds])
+
+    localStorage.setItem(storageKeys.selectedTransactions, JSON.stringify(Array.from(selectedTransactionIds)))
+  }, [fromDate, toDate, showTransfers, selectedAccountIds, selectedCategoryIds, selectedTransactionIds])
 
   if (!categoryGroups || !accounts || !transactions) {
     return <span>Loading...</span>
+  }
+
+  function handleSelectTransaction(transactionId: string) {
+    if (selectedTransactionIds.has(transactionId)) {
+      selectedTransactionIds.delete(transactionId)
+    } else {
+      selectedTransactionIds.add(transactionId)
+    }
+
+    setSelectedTransactionIds(new Set(selectedTransactionIds))
   }
 
   const getCategoryName = (categoryId: string) => categoriesMap.get(categoryId)?.name || categoryId
@@ -204,11 +226,14 @@ function Transactions(props: Props) {
           onChange={(selection) => setSelectedCategoryIds(selection.selectedIds)}
         />
       </div>
-      <h2 className="mt-4 mb-2 font-medium text-gray-900">Transactions ({filteredTransactions.length})</h2>
+      <h2 className="mt-4 mb-2 font-medium text-gray-900">
+        Transactions ({selectedTransactionIds.size}/{filteredTransactions.length})
+      </h2>
       <TransactionsList
         className="p-transactions-list"
         transactions={filteredTransactions}
         getCategoryName={getCategoryName}
+        onSelect={handleSelectTransaction}
       />
     </>
   )

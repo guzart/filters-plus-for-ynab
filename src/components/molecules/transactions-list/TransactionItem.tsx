@@ -5,6 +5,7 @@ import './TransactionItem.scss'
 type Props = PropsWithoutRef<{
   transaction: TransactionSummary
   getCategoryName: (categoryId: string) => string
+  onClick?: (transactionId: string) => void
 }>
 
 const dateFormatter = new Intl.DateTimeFormat('en-CA', {
@@ -17,7 +18,7 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 })
 
 function TransactionsListItem(props: Props) {
-  const { transaction: trx, getCategoryName, ...other } = props
+  const { transaction: trx, getCategoryName, onClick, ...other } = props
   const flagClassName = trx.flag_color ? `mod-${trx.flag_color}` : ''
 
   const subsElement = trx.subtransactions.length > 0 ? <div>{JSON.stringify(trx.subtransactions)}</div> : null
@@ -27,7 +28,7 @@ function TransactionsListItem(props: Props) {
   ) : null
 
   return (
-    <li className="m-transactionsList-item" {...other}>
+    <li className="m-transactionsList-item" onClick={() => onClick?.call(trx, trx.id)} {...other}>
       <div className={`m-transactionsList-item-wrapper ${flagClassName}`}>
         <div>
           <div>
