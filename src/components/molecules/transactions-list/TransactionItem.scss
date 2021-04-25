@@ -1,7 +1,36 @@
 .m-transactionsList-item {
-  @apply block px-4 py-4;
+  @apply block;
 
   &:hover {
     @apply bg-gray-50;
+  }
+
+  &-wrapper {
+    @apply px-4 py-4 border-transparent border-l-4;
+    @apply flex justify-between;
+
+    &.mod-red {
+      @apply border-red-700;
+    }
+
+    &.mod-orange {
+      @apply border-yellow-700;
+    }
+
+    &.mod-yellow {
+      @apply border-yellow-300;
+    }
+
+    &.mod-green {
+      @apply border-green-700;
+    }
+
+    &.mod-blue {
+      @apply border-blue-700;
+    }
+
+    &.mod-purple {
+      @apply border-purple-700;
+    }
   }
 }

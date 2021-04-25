@@ -15,15 +15,23 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 
 function TransactionsListItem(props: Props) {
   const { transaction: trx, ...other } = props
+  const flagClassName = trx.flag_color ? `mod-${trx.flag_color}` : ''
 
   return (
     <li className="m-transactionsList-item" {...other}>
-      <div>{dateFormatter.format(new Date(trx.date))}</div>
-      <div>{trx.account_name}</div>
-      <div>{trx.category_name}</div>
-      <div>{trx.payee_name}</div>
-      <div>{currencyFormatter.format(trx.amount / 1000)}</div>
-      <div>{JSON.stringify(trx.subtransactions)}</div>
+      <div className={`m-transactionsList-item-wrapper ${flagClassName}`}>
+        <div>
+          <div>{trx.category_name}</div>
+          <div>{trx.payee_name}</div>
+          <div>{trx.memo}</div>
+          <div>{trx.account_name}</div>
+          <div>{currencyFormatter.format(trx.amount / 1000)}</div>
+          <div>{JSON.stringify(trx.subtransactions)}</div>
+        </div>
+        <div className="">
+          <div>{dateFormatter.format(new Date(trx.date))}</div>
+        </div>
+      </div>
     </li>
   )
 }

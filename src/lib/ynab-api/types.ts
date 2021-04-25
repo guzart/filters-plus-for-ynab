@@ -105,7 +105,7 @@ export interface TransactionSummary {
    * Whether or not the transaction is approved
    */
   approved: boolean
-  flag_color: FlagColor
+  flag_color: FlagColor | null
   account_id: string
   payee_id: string
   category_id: string
