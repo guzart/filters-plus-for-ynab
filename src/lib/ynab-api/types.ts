@@ -96,7 +96,7 @@ export interface TransactionSummary {
   id: string
   date: string
   amount: number
-  memo: string
+  memo: string | null
   /**
    * The cleared status of the transaction
    */

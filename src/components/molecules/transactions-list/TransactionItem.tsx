@@ -2,7 +2,10 @@ import { PropsWithoutRef } from 'react'
 import { TransactionSummary } from '../../../lib/ynab-api/types'
 import './TransactionItem.scss'
 
-type Props = PropsWithoutRef<{ transaction: TransactionSummary }>
+type Props = PropsWithoutRef<{
+  transaction: TransactionSummary
+  getCategoryName: (categoryId: string) => string
+}>
 
 const dateFormatter = new Intl.DateTimeFormat('en-CA', {
   dateStyle: 'full',
@@ -17,19 +20,27 @@ function TransactionsListItem(props: Props) {
   const { transaction: trx, ...other } = props
   const flagClassName = trx.flag_color ? `mod-${trx.flag_color}` : ''
 
+  const subsElement = trx.subtransactions.length > 0 ? <div>{JSON.stringify(trx.subtransactions)}</div> : null
+
+  const memoElement = trx.memo ? (
+    <span className="inline-block ml-3 text-sm text-gray-600">– {trx.memo}</span>
+  ) : null
+
   return (
     <li className="m-transactionsList-item" {...other}>
       <div className={`m-transactionsList-item-wrapper ${flagClassName}`}>
         <div>
-          <div>{trx.category_name}</div>
-          <div>{trx.payee_name}</div>
-          <div>{trx.memo}</div>
-          <div>{trx.account_name}</div>
+          <div>
+            <span className="font-medium">{trx.payee_name}</span>
+            {memoElement}
+          </div>
           <div>{currencyFormatter.format(trx.amount / 1000)}</div>
-          <div>{JSON.stringify(trx.subtransactions)}</div>
+          <div className="text-sm">{trx.account_name}</div>
+          {subsElement}
         </div>
-        <div className="">
+        <div className="text-right">
           <div>{dateFormatter.format(new Date(trx.date))}</div>
+          <div>{props.getCategoryName(trx.category_id)}</div>
         </div>
       </div>
     </li>

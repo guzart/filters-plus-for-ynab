@@ -1,6 +1,6 @@
 import flatMap from 'lodash/flatMap'
 import padStart from 'lodash/padStart'
-import { PropsWithoutRef, useEffect, useState } from 'react'
+import { PropsWithoutRef, useEffect, useMemo, useState } from 'react'
 import type Client from '../../../lib/ynab-api/client'
 import type * as t from '../../../lib/ynab-api/types'
 import CheckboxList from '../checkbox-list/CheckboxList'
@@ -33,6 +33,16 @@ function TransactionsList(props: Props) {
   // Budget Entities
 
   const [categoryGroups, setCategoryGroups] = useState(null as t.CategoryGroupWithCategories[] | null)
+  const categoriesMap = useMemo(() => {
+    const output = new Map<string, { name: string }>()
+    categoryGroups?.forEach((group) => {
+      group.categories.forEach((category) => {
+        output.set(category.id, { name: `${category.name} (${group.name})` })
+      })
+    })
+
+    return output
+  }, [categoryGroups])
 
   const [accounts, setAccounts] = useState(null as t.Account[] | null)
 
@@ -107,6 +117,8 @@ function TransactionsList(props: Props) {
   if (!categoryGroups || !accounts || !transactions) {
     return <span>Loading...</span>
   }
+
+  const getCategoryName = (categoryId: string) => categoriesMap.get(categoryId)?.name || categoryId
 
   const filteredTransactions = transactions.filter((trx) => {
     if (fromDate && toDate) {
@@ -183,7 +195,7 @@ function TransactionsList(props: Props) {
       <h2 className="mt-4 mb-2">Transactions ({filteredTransactions.length})</h2>
       <ul className="m-transactionsList">
         {filteredTransactions.map((trx) => (
-          <TransactionsListItem key={trx.id} transaction={trx} />
+          <TransactionsListItem key={trx.id} transaction={trx} getCategoryName={getCategoryName} />
         ))}
       </ul>
     </>
