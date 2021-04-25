@@ -1,0 +1,11 @@
+.m-transactionsList {
+  @apply divide-y divide-gray-200 bg-white shadow;
+
+  &-item {
+    @apply block px-4 py-4;
+
+    &:hover {
+      @apply bg-gray-50;
+    }
+  }
+}

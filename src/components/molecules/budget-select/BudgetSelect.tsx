@@ -16,10 +16,6 @@ function isExpired(time: string) {
   return difference > 2 * 60 * 1000
 }
 
-function hash(id: string) {
-  return window.btoa(id)
-}
-
 function BudgetSelect(props: Props) {
   const [budgets, setBudgets] = useState([] as BudgetSummary[])
 

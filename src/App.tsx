@@ -1,8 +1,8 @@
-import isEmpty from 'lodash/isEmpty'
 import { useEffect, useState } from 'react'
 
 import Button from './components/atoms/button/Button'
 import BudgetSelect from './components/molecules/budget-select/BudgetSelect'
+import TransactionsList from './components/molecules/transactions-list/TransactionsList'
 import Client from './lib/ynab-api/client'
 import './App.scss'
 
@@ -14,20 +14,20 @@ const authorizationUrl = `https://app.youneedabudget.com/oauth/authorize?client_
 const client = new Client()
 
 function App() {
-  const [accessToken, setAccessToken] = useState('')
+  const [accessToken, setAccessToken] = useState(null as string | null)
 
   useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken')
-    if (accessToken && !isEmpty(accessToken)) {
-      client.updateAccessToken(accessToken)
+    const storedToken = localStorage.getItem('accessToken')
+    if (storedToken) {
+      client.updateAccessToken(storedToken)
       client
         .getUserInfo()
         .then(() => {
-          setAccessToken(accessToken)
+          setAccessToken(storedToken)
         })
         .catch((_err) => {
           localStorage.removeItem('accessToken')
-          setAccessToken('')
+          setAccessToken(null)
         })
     } else {
       const hash = window.location.hash.replace('#', '')
@@ -40,18 +40,18 @@ function App() {
     }
   }, [accessToken])
 
-  const [activeBudgetId, setActiveBudgetId] = useState('')
+  const [activeBudgetId, setActiveBudgetId] = useState(null as string | null)
 
   useEffect(() => {
     const budgetId = localStorage.getItem('activeBudgetId')
-    if (budgetId && !isEmpty(budgetId)) {
+    if (budgetId) {
       setActiveBudgetId(budgetId)
-    } else if (!isEmpty(activeBudgetId)) {
+    } else if (activeBudgetId) {
       localStorage.setItem('activeBudgetId', activeBudgetId)
     }
   }, [activeBudgetId])
 
-  if (isEmpty(accessToken)) {
+  if (!accessToken) {
     return (
       <div className="app-authorize">
         <Button href={authorizationUrl}>Connect with YNAB</Button>
@@ -59,7 +59,7 @@ function App() {
     )
   }
 
-  if (isEmpty(activeBudgetId)) {
+  if (!activeBudgetId) {
     return (
       <div className="app-budgets">
         <BudgetSelect
@@ -70,7 +70,11 @@ function App() {
     )
   }
 
-  return <div className="app">{activeBudgetId}</div>
+  return (
+    <div className="app-transactions">
+      <TransactionsList budgetId={activeBudgetId} client={client} />
+    </div>
+  )
 }
 
 export default App
