@@ -1,0 +1,23 @@
+.p-transactions {
+  &-dateInput {
+    @apply border-b border-gray-600;
+    @apply px-1 py-1 text-center;
+
+    &:focus {
+      @apply ring-green-500 border-green-500;
+    }
+  }
+
+  &-checkboxList {
+    @apply mt-4;
+
+    &-list {
+      @apply max-h-60 overflow-auto;
+    }
+  }
+
+  &-list {
+    @apply overflow-auto;
+    max-height: 70vh;
+  }
+}

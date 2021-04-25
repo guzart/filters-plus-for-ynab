@@ -17,7 +17,7 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 })
 
 function TransactionsListItem(props: Props) {
-  const { transaction: trx, ...other } = props
+  const { transaction: trx, getCategoryName, ...other } = props
   const flagClassName = trx.flag_color ? `mod-${trx.flag_color}` : ''
 
   const subsElement = trx.subtransactions.length > 0 ? <div>{JSON.stringify(trx.subtransactions)}</div> : null
@@ -40,7 +40,7 @@ function TransactionsListItem(props: Props) {
         </div>
         <div className="text-right">
           <div>{dateFormatter.format(new Date(trx.date))}</div>
-          <div>{props.getCategoryName(trx.category_id)}</div>
+          <div>{getCategoryName(trx.category_id)}</div>
         </div>
       </div>
     </li>

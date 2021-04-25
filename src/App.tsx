@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import Button from './components/atoms/button/Button'
 import BudgetSelect from './components/molecules/budget-select/BudgetSelect'
-import TransactionsList from './components/molecules/transactions-list/TransactionsList'
+import Transactions from './components/pages/transactions/Transactions'
 import Client from './lib/ynab-api/client'
 import './App.scss'
 
@@ -68,7 +68,7 @@ function App() {
 
   return (
     <div className="app-transactions">
-      <TransactionsList budgetId={activeBudgetId} client={client} />
+      <Transactions budgetId={activeBudgetId} client={client} />
     </div>
   )
 }
