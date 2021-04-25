@@ -14,17 +14,19 @@ type Props = PropsWithoutRef<{
 
 function TransactionsList(props: Props) {
   return (
-    <ul className={`m-transactionsList ${props.className}`}>
-      {props.transactions.map((trx) => (
-        <TransactionsListItem
-          key={trx.id}
-          transaction={trx}
-          getCategoryName={props.getCategoryName}
-          onClick={(trxId) => props.onSelect?.call(trx, trxId)}
-          isSelected={props.selectedTransactionIds?.has(trx.id)}
-        />
-      ))}
-    </ul>
+    <div className={`m-transactionsList ${props.className || ''}`}>
+      <ul className="m-transactionsList-container">
+        {props.transactions.map((trx) => (
+          <TransactionsListItem
+            key={trx.id}
+            transaction={trx}
+            getCategoryName={props.getCategoryName}
+            onClick={(trxId) => props.onSelect?.call(trx, trxId)}
+            isSelected={props.selectedTransactionIds?.has(trx.id)}
+          />
+        ))}
+      </ul>
+    </div>
   )
 }
 

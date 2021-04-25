@@ -17,6 +17,7 @@ type Props = PropsWithoutRef<{
   id: string
   name: string
   label: string
+  labelClassName?: string
   description?: string
   items: Item[]
   value: Set<string>
@@ -66,12 +67,12 @@ function CheckboxList(props: Props) {
 
   return (
     <div className={props.className}>
-      <div className="m-checkboxList-label">
+      <div className={`m-checkboxList-label ${props.labelClassName || ''}`}>
         {props.label}({props.value.size}/{props.items.length})
       </div>
       <div
         ref={refContainer}
-        className={`mt-4 space-y-4 pl-4 ${props.listClassName || ''}`}
+        className={`mt-4 space-y-4 ${props.listClassName || ''}`}
         onClick={handleContainerClick}
       >
         {props.items.map((item) => (

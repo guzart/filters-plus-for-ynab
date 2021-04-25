@@ -1,4 +1,12 @@
 .p-transactions {
+  &-filterHeading {
+    @apply text-base font-medium text-gray-900 leading-6 mb-2;
+
+    &.mod-toggleLabel {
+      @apply inline-block ml-2 mb-0 cursor-pointer;
+    }
+  }
+
   &-dateInput {
     @apply border-b border-gray-600;
     @apply px-1 py-1 text-center;
@@ -16,7 +24,7 @@
     }
   }
 
-  &-list {
+  &-window {
     @apply overflow-auto;
     max-height: 70vh;
   }

@@ -4,6 +4,8 @@ import { toUTCDateString } from '../../../lib/helpers/format'
 import type Client from '../../../lib/ynab-api/client'
 import type * as t from '../../../lib/ynab-api/types'
 import Toggle from '../../atoms/toggle/Toggle'
+import * as cards from '../../atoms/card'
+import SectionTitle from '../../atoms/section-title/SectionTitle'
 import CheckboxList from '../../molecules/checkbox-list/CheckboxList'
 import TransactionsList from '../../molecules/transactions-list/TransactionsList'
 
@@ -183,9 +185,10 @@ function Transactions(props: Props) {
   // Other filters: memo, flags, amount range, payees
   return (
     <>
-      <div>
-        <div>
-          <div className="text-base font-medium text-gray-900">Date Range</div>
+      <SectionTitle>Filters</SectionTitle>
+      <cards.Card>
+        <cards.Section>
+          <h3 className="p-transactions-filterHeading">Date Range</h3>
           <input
             className="p-transactions-dateInput"
             type="date"
@@ -199,53 +202,67 @@ function Transactions(props: Props) {
             value={toUTCDateString(toDate)}
             onChange={(ev) => setToDate(ev.target.valueAsDate)}
           />
-        </div>
-        <div className="flex items-center mt-4">
-          <span className="font-medium text-gray-900 inline-block mr-2">Show Transfers</span>
-          <Toggle
-            label="Show Transfer"
-            value={showTransfers}
-            onChange={(checked) => setShowTransfers(checked)}
+        </cards.Section>
+        <cards.Section>
+          <div className="flex items-center mt-4">
+            <Toggle
+              label="Show Transfer"
+              value={showTransfers}
+              onChange={(checked) => setShowTransfers(checked)}
+            />
+            <h3
+              className="p-transactions-filterHeading mod-toggleLabel"
+              onClick={() => setShowTransfers(!showTransfers)}
+            >
+              Show Transfers
+            </h3>
+          </div>
+        </cards.Section>
+        <cards.Section>
+          <CheckboxList
+            id="accounts"
+            name="accounts"
+            label="Accounts"
+            items={accounts.map(({ id, name }) => ({ id, name }))}
+            className="p-transactions-checkboxList"
+            labelClassName="p-transactions-filterHeading"
+            listClassName="p-transactions-checkboxList-list"
+            value={selectedAccountIds}
+            onChange={(selection) => setSelectedAccountIds(selection.selectedIds)}
           />
-        </div>
-        <CheckboxList
-          id="accounts"
-          name="accounts"
-          label="Accounts"
-          items={accounts.map(({ id, name }) => ({ id, name }))}
-          className="p-transactions-checkboxList"
-          listClassName="p-transactions-checkboxList-list"
-          value={selectedAccountIds}
-          onChange={(selection) => setSelectedAccountIds(selection.selectedIds)}
-        />
-        <CheckboxList
-          id="categories"
-          name="categories"
-          label="Categories"
-          items={flatMap(
-            categoryGroups.map((group) =>
-              group.categories.map(({ id, name }) => ({
-                id,
-                name: `${name} (${group.name})`,
-              })),
-            ),
-          )}
-          className="p-transactions-checkboxList"
-          listClassName="p-transactions-checkboxList-list"
-          value={selectedCategoryIds}
-          onChange={(selection) => setSelectedCategoryIds(selection.selectedIds)}
+        </cards.Section>
+        <cards.Section>
+          <CheckboxList
+            id="categories"
+            name="categories"
+            label="Categories"
+            items={flatMap(
+              categoryGroups.map((group) =>
+                group.categories.map(({ id, name }) => ({
+                  id,
+                  name: `${name} (${group.name})`,
+                })),
+              ),
+            )}
+            className="p-transactions-checkboxList"
+            labelClassName="p-transactions-filterHeading"
+            listClassName="p-transactions-checkboxList-list"
+            value={selectedCategoryIds}
+            onChange={(selection) => setSelectedCategoryIds(selection.selectedIds)}
+          />
+        </cards.Section>
+      </cards.Card>
+      <SectionTitle>
+        Transactions ({selectedTransactionIds.size}/{filteredTransactions.length})
+      </SectionTitle>
+      <div className="p-transactions-window">
+        <TransactionsList
+          transactions={filteredTransactions}
+          getCategoryName={getCategoryName}
+          onSelect={handleSelectTransaction}
+          selectedTransactionIds={selectedTransactionIds}
         />
       </div>
-      <h2 className="mt-4 mb-2 font-medium text-gray-900">
-        Transactions ({selectedTransactionIds.size}/{filteredTransactions.length})
-      </h2>
-      <TransactionsList
-        className="p-transactions-list"
-        transactions={filteredTransactions}
-        getCategoryName={getCategoryName}
-        onSelect={handleSelectTransaction}
-        selectedTransactionIds={selectedTransactionIds}
-      />
     </>
   )
 }

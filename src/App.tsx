@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import Button from './components/atoms/button/Button'
+import Container from './components/atoms/container/Container'
 import BudgetSelect from './components/molecules/budget-select/BudgetSelect'
 import Transactions from './components/pages/transactions/Transactions'
 import Client from './lib/ynab-api/client'
@@ -13,6 +14,7 @@ const authorizationUrl = `https://app.youneedabudget.com/oauth/authorize?client_
 const client = new Client()
 
 function App() {
+  const [isInitializing, setIsInitializing] = useState(true)
   const [accessToken, setAccessToken] = useState(null as string | null)
 
   useEffect(() => {
@@ -28,6 +30,9 @@ function App() {
           localStorage.removeItem('accessToken')
           setAccessToken(null)
         })
+        .finally(() => {
+          setIsInitializing(false)
+        })
     } else {
       const hash = window.location.hash.replace('#', '')
       const params = new URLSearchParams(hash)
@@ -36,6 +41,8 @@ function App() {
         localStorage.setItem('accessToken', accessTokenParam)
         window.location.href = redirectUrl
       }
+
+      setIsInitializing(false)
     }
   }, [accessToken])
 
@@ -49,6 +56,10 @@ function App() {
       localStorage.setItem('activeBudgetId', activeBudgetId)
     }
   }, [activeBudgetId])
+
+  if (isInitializing) {
+    return <div>Initializing...</div>
+  }
 
   if (!accessToken) {
     return (
@@ -67,9 +78,9 @@ function App() {
   }
 
   return (
-    <div className="app-transactions">
+    <Container className="app-transactions">
       <Transactions budgetId={activeBudgetId} client={client} />
-    </div>
+    </Container>
   )
 }
 

@@ -1,3 +1,7 @@
 .m-transactionsList {
-  @apply divide-y divide-gray-200 bg-white shadow;
+  @apply bg-white shadow overflow-hidden border border-gray-200 rounded-md;
+
+  &-container {
+    @apply divide-y divide-gray-200;
+  }
 }
