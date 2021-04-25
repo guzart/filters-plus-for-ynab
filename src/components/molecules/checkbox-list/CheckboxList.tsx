@@ -29,6 +29,10 @@ function CheckboxList(props: Props) {
 
   const descriptionElement = props.description ? <p className="text-gray-500">{props.description}</p> : null
 
+  function handleOnChange() {
+    // No op. Used to make checkbox mutable
+  }
+
   function handleContainerClick(event: MouseEvent) {
     const target = event.target
     if (refContainer.current && target instanceof HTMLInputElement) {
@@ -43,7 +47,6 @@ function CheckboxList(props: Props) {
         )
 
         if (target.checked) {
-          // is selection
           const selectedIds = new Set(Array.from(props.value).concat(rangeValues))
           props.onChange({ selectedIds })
         } else {
@@ -81,6 +84,7 @@ function CheckboxList(props: Props) {
                 type="checkbox"
                 className="m-checkboxList-input"
                 checked={props.value.has(item.id)}
+                onChange={handleOnChange}
               />
             </div>
             <div className="ml-3 text-sm">

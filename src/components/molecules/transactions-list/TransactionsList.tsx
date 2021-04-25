@@ -36,8 +36,6 @@ function TransactionsList(props: Props) {
 
   const [accounts, setAccounts] = useState(null as t.Account[] | null)
 
-  const [payees, setPayees] = useState(null as t.Payee[] | null)
-
   const [transactions, setTransactions] = useState(null as t.TransactionSummary[] | null)
 
   useEffect(() => {
@@ -49,14 +47,10 @@ function TransactionsList(props: Props) {
       props.client.getAccounts(budgetId).then((data) => setAccounts(data.accounts))
     }
 
-    if (!payees) {
-      props.client.getPayees(budgetId).then((data) => setPayees(data.payees))
-    }
-
     if (!transactions) {
       props.client.getTransactions(budgetId).then((data) => setTransactions(data.transactions))
     }
-  }, [props.client, budgetId, categoryGroups, accounts, payees, transactions])
+  }, [props.client, budgetId, categoryGroups, accounts, transactions])
 
   // Filters
 
@@ -110,7 +104,7 @@ function TransactionsList(props: Props) {
     localStorage.setItem(storageKeys.categoryIds, JSON.stringify(Array.from(selectedCategoryIds)))
   }, [fromDate, toDate, selectedAccountIds, selectedCategoryIds])
 
-  if (!categoryGroups || !accounts || !payees || !transactions) {
+  if (!categoryGroups || !accounts || !transactions) {
     return <span>Loading...</span>
   }
 
@@ -184,16 +178,6 @@ function TransactionsList(props: Props) {
           listClassName="m-transactionsList-checkboxList-list"
           value={selectedCategoryIds}
           onChange={(selection) => setSelectedCategoryIds(selection.selectedIds)}
-        />
-        <CheckboxList
-          id="payees"
-          name="payees"
-          label="Payees"
-          items={payees.map(({ id, name }) => ({ id, name }))}
-          className="m-transactionsList-checkboxList"
-          listClassName="m-transactionsList-checkboxList-list"
-          onChange={() => {}}
-          value={new Set()}
         />
       </div>
       <h2 className="mt-4 mb-2">Transactions ({filteredTransactions.length})</h2>
