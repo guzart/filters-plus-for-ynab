@@ -1,10 +1,12 @@
 import { PropsWithoutRef } from 'react'
 import { TransactionSummary } from '../../../lib/ynab-api/types'
+import Icon from '../../atoms/icon/Icon'
 import './TransactionItem.scss'
 
 type Props = PropsWithoutRef<{
   transaction: TransactionSummary
   getCategoryName: (categoryId: string) => string
+  isSelected?: boolean
   onClick?: (transactionId: string) => void
 }>
 
@@ -18,8 +20,9 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 })
 
 function TransactionsListItem(props: Props) {
-  const { transaction: trx, getCategoryName, onClick, ...other } = props
+  const { transaction: trx, getCategoryName, isSelected, onClick, ...other } = props
   const flagClassName = trx.flag_color ? `mod-${trx.flag_color}` : ''
+  const modClassName = isSelected ? 'mod-selected' : ''
 
   const subsElement = trx.subtransactions.length > 0 ? <div>{JSON.stringify(trx.subtransactions)}</div> : null
 
@@ -27,8 +30,18 @@ function TransactionsListItem(props: Props) {
     <span className="inline-block ml-3 text-sm text-gray-600">– {trx.memo}</span>
   ) : null
 
+  const selectedElement = isSelected ? (
+    <div className="text-green-600">
+      <Icon name="circleCheck" />
+    </div>
+  ) : null
+
   return (
-    <li className="m-transactionsList-item" onClick={() => onClick?.call(trx, trx.id)} {...other}>
+    <li
+      className={`m-transactionsList-item ${modClassName}`}
+      onClick={() => onClick?.call(trx, trx.id)}
+      {...other}
+    >
       <div className={`m-transactionsList-item-wrapper ${flagClassName}`}>
         <div>
           <div>
@@ -39,9 +52,13 @@ function TransactionsListItem(props: Props) {
           <div className="text-sm">{trx.account_name}</div>
           {subsElement}
         </div>
-        <div className="text-right">
-          <div>{dateFormatter.format(new Date(trx.date))}</div>
-          <div>{getCategoryName(trx.category_id)}</div>
+        <div className="text-right flex-col justify-between">
+          <div>
+            {dateFormatter.format(new Date(trx.date))}
+            <br />
+            {getCategoryName(trx.category_id)}
+          </div>
+          {selectedElement}
         </div>
       </div>
     </li>

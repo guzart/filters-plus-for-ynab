@@ -234,6 +234,7 @@ function Transactions(props: Props) {
         transactions={filteredTransactions}
         getCategoryName={getCategoryName}
         onSelect={handleSelectTransaction}
+        selectedTransactionIds={selectedTransactionIds}
       />
     </>
   )

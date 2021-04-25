@@ -5,6 +5,10 @@
     @apply bg-gray-50;
   }
 
+  &.mod-selected {
+    @apply bg-green-50;
+  }
+
   &-wrapper {
     @apply px-4 py-4 border-transparent border-l-4;
     @apply flex justify-between;

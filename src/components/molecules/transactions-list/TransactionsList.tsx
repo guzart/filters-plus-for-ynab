@@ -7,8 +7,9 @@ import './TransactionsList.scss'
 type Props = PropsWithoutRef<{
   className?: string
   getCategoryName: (categoryId: string) => string
-  onSelect?: (transactionId: string) => void
   transactions: t.TransactionSummary[]
+  onSelect?: (transactionId: string) => void
+  selectedTransactionIds?: Set<string>
 }>
 
 function TransactionsList(props: Props) {
@@ -20,6 +21,7 @@ function TransactionsList(props: Props) {
           transaction={trx}
           getCategoryName={props.getCategoryName}
           onClick={(trxId) => props.onSelect?.call(trx, trxId)}
+          isSelected={props.selectedTransactionIds?.has(trx.id)}
         />
       ))}
     </ul>
