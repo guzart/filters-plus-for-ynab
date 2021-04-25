@@ -3,6 +3,7 @@ import padStart from 'lodash/padStart'
 import { PropsWithoutRef, useEffect, useMemo, useState } from 'react'
 import type Client from '../../../lib/ynab-api/client'
 import type * as t from '../../../lib/ynab-api/types'
+import Toggle from '../../atoms/toggle/Toggle'
 import CheckboxList from '../checkbox-list/CheckboxList'
 import TransactionsListItem from './TransactionItem'
 
@@ -15,6 +16,7 @@ const storageKeys = {
   categoryIds: 'selectedCategoryIds',
   fromDate: 'fromDateFilter',
   toDate: 'toDateFilter',
+  showTransfers: 'showTransfersFilter',
 }
 
 function toUTCDateString(date: Date | null) {
@@ -82,6 +84,15 @@ function TransactionsList(props: Props) {
     return null
   })
 
+  const [showTransfers, setShowTransfers] = useState(() => {
+    const storedValue = localStorage.getItem(storageKeys.showTransfers)
+    if (storedValue) {
+      return storedValue !== 'false'
+    }
+
+    return true
+  })
+
   const [selectedAccountIds, setSelectedAccountIds] = useState(() => {
     const storedIds = localStorage.getItem(storageKeys.accountIds)
     if (storedIds) {
@@ -109,10 +120,12 @@ function TransactionsList(props: Props) {
       localStorage.setItem(storageKeys.toDate, toDate.toISOString())
     }
 
+    localStorage.setItem(storageKeys.showTransfers, JSON.stringify(showTransfers))
+
     localStorage.setItem(storageKeys.accountIds, JSON.stringify(Array.from(selectedAccountIds)))
 
     localStorage.setItem(storageKeys.categoryIds, JSON.stringify(Array.from(selectedCategoryIds)))
-  }, [fromDate, toDate, selectedAccountIds, selectedCategoryIds])
+  }, [fromDate, toDate, showTransfers, selectedAccountIds, selectedCategoryIds])
 
   if (!categoryGroups || !accounts || !transactions) {
     return <span>Loading...</span>
@@ -130,6 +143,10 @@ function TransactionsList(props: Props) {
       }
     }
 
+    if (!showTransfers && trx.transfer_account_id) {
+      return false
+    }
+
     if (!selectedAccountIds.has(trx.account_id)) {
       return false
     }
@@ -141,6 +158,7 @@ function TransactionsList(props: Props) {
     return true
   })
 
+  // Other filters: memo, flags, amount range, payees
   return (
     <>
       <div>
@@ -160,10 +178,14 @@ function TransactionsList(props: Props) {
             onChange={(ev) => setToDate(ev.target.valueAsDate)}
           />
         </div>
-        <div>(Memo)</div>
-        <div>(Flags)</div>
-        <div>(Amount Range)</div>
-        <div>(Show transfers)</div>
+        <div className="flex items-center mt-4">
+          <span className="font-medium text-gray-900 inline-block mr-2">Show Transfers</span>
+          <Toggle
+            label="Show Transfer"
+            value={showTransfers}
+            onChange={(checked) => setShowTransfers(checked)}
+          />
+        </div>
         <CheckboxList
           id="accounts"
           name="accounts"
