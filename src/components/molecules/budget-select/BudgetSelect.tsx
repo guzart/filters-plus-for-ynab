@@ -26,10 +26,7 @@ function BudgetSelect(props: Props) {
       props.client.getBudgets().then((data) => {
         setBudgets(data.budgets)
         localStorage.setItem('budgets', JSON.stringify(data.budgets))
-        localStorage.setItem(
-          'budgetsFetchedAt',
-          new Date().getTime().toString(),
-        )
+        localStorage.setItem('budgetsFetchedAt', new Date().getTime().toString())
       })
     } else if (data && budgets.length === 0) {
       setBudgets(JSON.parse(data))
@@ -42,10 +39,7 @@ function BudgetSelect(props: Props) {
       <ul className="m-budgetSelecti-list">
         {budgets.map((budget) => (
           <li className="m-budgetSelect-item" key={budget.id}>
-            <button
-              className="m-budgetSelect-button"
-              onClick={() => props.onSelect(budget.id)}
-            >
+            <button className="m-budgetSelect-button" onClick={() => props.onSelect(budget.id)}>
               {budget.name}
             </button>
           </li>

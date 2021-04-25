@@ -32,29 +32,21 @@ function TransactionsList(props: Props) {
 
   // Budget Entities
 
-  const [categoryGroups, setCategoryGroups] = useState(
-    null as t.CategoryGroupWithCategories[] | null,
-  )
+  const [categoryGroups, setCategoryGroups] = useState(null as t.CategoryGroupWithCategories[] | null)
 
   const [accounts, setAccounts] = useState(null as t.Account[] | null)
 
   const [payees, setPayees] = useState(null as t.Payee[] | null)
 
-  const [transactions, setTransactions] = useState(
-    null as t.TransactionSummary[] | null,
-  )
+  const [transactions, setTransactions] = useState(null as t.TransactionSummary[] | null)
 
   useEffect(() => {
     if (!categoryGroups) {
-      props.client
-        .getCategoryGroups(budgetId)
-        .then((data) => setCategoryGroups(data.category_groups))
+      props.client.getCategoryGroups(budgetId).then((data) => setCategoryGroups(data.category_groups))
     }
 
     if (!accounts) {
-      props.client
-        .getAccounts(budgetId)
-        .then((data) => setAccounts(data.accounts))
+      props.client.getAccounts(budgetId).then((data) => setAccounts(data.accounts))
     }
 
     if (!payees) {
@@ -62,9 +54,7 @@ function TransactionsList(props: Props) {
     }
 
     if (!transactions) {
-      props.client
-        .getTransactions(budgetId)
-        .then((data) => setTransactions(data.transactions))
+      props.client.getTransactions(budgetId).then((data) => setTransactions(data.transactions))
     }
   }, [props.client, budgetId, categoryGroups, accounts, payees, transactions])
 
@@ -115,22 +105,14 @@ function TransactionsList(props: Props) {
       localStorage.setItem(storageKeys.toDate, toDate.toISOString())
     }
 
-    localStorage.setItem(
-      storageKeys.accountIds,
-      JSON.stringify(Array.from(selectedAccountIds)),
-    )
+    localStorage.setItem(storageKeys.accountIds, JSON.stringify(Array.from(selectedAccountIds)))
 
-    localStorage.setItem(
-      storageKeys.categoryIds,
-      JSON.stringify(Array.from(selectedCategoryIds)),
-    )
+    localStorage.setItem(storageKeys.categoryIds, JSON.stringify(Array.from(selectedCategoryIds)))
   }, [fromDate, toDate, selectedAccountIds, selectedCategoryIds])
 
   if (!categoryGroups || !accounts || !payees || !transactions) {
     return <span>Loading...</span>
   }
-
-  console.log(selectedCategoryIds)
 
   const filteredTransactions = transactions.filter((trx) => {
     if (fromDate && toDate) {
@@ -201,9 +183,7 @@ function TransactionsList(props: Props) {
           className="m-transactionsList-checkboxList"
           listClassName="m-transactionsList-checkboxList-list"
           value={selectedCategoryIds}
-          onChange={(selection) =>
-            setSelectedCategoryIds(selection.selectedIds)
-          }
+          onChange={(selection) => setSelectedCategoryIds(selection.selectedIds)}
         />
         <CheckboxList
           id="payees"
@@ -216,9 +196,7 @@ function TransactionsList(props: Props) {
           value={new Set()}
         />
       </div>
-      <h2 className="mt-4 mb-2">
-        Transactions ({filteredTransactions.length})
-      </h2>
+      <h2 className="mt-4 mb-2">Transactions ({filteredTransactions.length})</h2>
       <ul className="m-transactionsList">
         {filteredTransactions.map((trx) => (
           <TransactionsListItem key={trx.id} transaction={trx} />
