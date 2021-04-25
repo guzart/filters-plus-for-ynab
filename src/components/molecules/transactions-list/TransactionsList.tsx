@@ -163,16 +163,16 @@ function TransactionsList(props: Props) {
     <>
       <div>
         <div>
-          <div className="text-base font-medium text-gray-900">Date</div>
-          From{' '}
+          <div className="text-base font-medium text-gray-900">Date Range</div>
           <input
+            className="m-transactionsList-dateInput"
             type="date"
             value={toUTCDateString(fromDate)}
             onChange={(ev) => setFromDate(ev.target.valueAsDate)}
           />
-          <br />
-          To{' '}
+          <span className="inline-block mx-5"> – </span>
           <input
+            className="m-transactionsList-dateInput"
             type="date"
             value={toUTCDateString(toDate)}
             onChange={(ev) => setToDate(ev.target.valueAsDate)}
@@ -214,8 +214,8 @@ function TransactionsList(props: Props) {
           onChange={(selection) => setSelectedCategoryIds(selection.selectedIds)}
         />
       </div>
-      <h2 className="mt-4 mb-2">Transactions ({filteredTransactions.length})</h2>
-      <ul className="m-transactionsList">
+      <h2 className="mt-4 mb-2 font-medium text-gray-900">Transactions ({filteredTransactions.length})</h2>
+      <ul className="m-transactionsList-list">
         {filteredTransactions.map((trx) => (
           <TransactionsListItem key={trx.id} transaction={trx} getCategoryName={getCategoryName} />
         ))}
