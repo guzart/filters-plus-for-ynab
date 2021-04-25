@@ -114,10 +114,14 @@ function Transactions(props: Props) {
   useEffect(() => {
     if (fromDate) {
       localStorage.setItem(storageKeys.dateRangeFrom, fromDate.toISOString())
+    } else {
+      localStorage.removeItem(storageKeys.dateRangeFrom)
     }
 
     if (toDate) {
       localStorage.setItem(storageKeys.dateRangeTo, toDate.toISOString())
+    } else {
+      localStorage.removeItem(storageKeys.dateRangeTo)
     }
 
     localStorage.setItem(storageKeys.showTransfers, JSON.stringify(showTransfers))
