@@ -18,6 +18,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           email: '<>'
-          branch: main
           build_dir: build
           jekyll: no
