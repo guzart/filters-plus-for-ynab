@@ -1,14 +1,13 @@
-import { PropsWithoutRef } from 'react'
+import { HTMLProps } from 'react'
 import { TransactionSummary } from '../../../lib/ynab-api/types'
 import Icon from '../../atoms/icon/Icon'
 import './TransactionItem.scss'
 
-type Props = PropsWithoutRef<{
+type Props = HTMLProps<HTMLLIElement> & {
   transaction: TransactionSummary
   getCategoryName: (categoryId: string) => string
   isSelected?: boolean
-  onClick?: (transactionId: string) => void
-}>
+}
 
 const dateFormatter = new Intl.DateTimeFormat('en-CA', {
   dateStyle: 'full',
@@ -20,7 +19,7 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 })
 
 function TransactionsListItem(props: Props) {
-  const { transaction: trx, getCategoryName, isSelected, onClick, ...other } = props
+  const { transaction: trx, getCategoryName, isSelected, ...other } = props
   const flagClassName = trx.flag_color ? `mod-${trx.flag_color}` : ''
   const modClassName = isSelected ? 'mod-selected' : ''
 
@@ -37,11 +36,7 @@ function TransactionsListItem(props: Props) {
   ) : null
 
   return (
-    <li
-      className={`m-transactionsList-item ${modClassName}`}
-      onClick={() => onClick?.call(trx, trx.id)}
-      {...other}
-    >
+    <li className={`m-transactionsList-item ${modClassName}`} {...other}>
       <div className={`m-transactionsList-item-wrapper ${flagClassName}`}>
         <div>
           <div>

@@ -166,12 +166,15 @@ function Transactions(props: Props) {
     })
   }, [transactions, fromDate, toDate, showTransfers, selectedAccountIds, selectedCategoryIds])
 
-  function handleSelectTransaction(transactionId: string) {
-    if (selectedTransactionIds.has(transactionId)) {
-      selectedTransactionIds.delete(transactionId)
-    } else {
-      selectedTransactionIds.add(transactionId)
-    }
+  function handleSelectTransaction(transactionIds: string[], targetId: string) {
+    const isRemove = selectedTransactionIds.has(targetId)
+    transactionIds.forEach((id) => {
+      if (isRemove) {
+        selectedTransactionIds.delete(id)
+      } else {
+        selectedTransactionIds.add(id)
+      }
+    })
 
     setSelectedTransactionIds(new Set(selectedTransactionIds))
   }

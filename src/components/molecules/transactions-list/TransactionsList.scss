@@ -3,5 +3,6 @@
 
   &-container {
     @apply divide-y divide-gray-200;
+    user-select: none;
   }
 }
