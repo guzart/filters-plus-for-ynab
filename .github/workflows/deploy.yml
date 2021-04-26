@@ -11,10 +11,12 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - run: yarn install
-      - name: setup git config
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
-          git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-      - run: yarn deploy
+      - run: |
+        yarn install
+        yarn build
+      - uses: cecilapp/gitHub-pages-deploy@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          email: '<>'
+          branch: main
