@@ -19,3 +19,5 @@ jobs:
         with:
           email: '<>'
           branch: main
+          build_dir: build
+          jekyll: no
