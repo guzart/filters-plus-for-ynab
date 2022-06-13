@@ -14,10 +14,11 @@ import './Transactions.scss'
 type Props = PropsWithoutRef<{ budgetId: string; client: Client }>
 
 const storageKeys = {
-  accountIds: 'selectedAccountIds',
-  categoryIds: 'selectedCategoryIds',
   dateRangeFrom: 'fromDateFilter',
   dateRangeTo: 'toDateFilter',
+  selectedAccountIds: 'selectedAccountIds',
+  selectedCategoryIds: 'selectedCategoryIds',
+  selectedPayeeIds: 'selectedPayeeIds',
   selectedTransactions: 'selectedTransactions',
   showTransfers: 'showTransfersFilter',
 }
@@ -43,19 +44,7 @@ function Transactions(props: Props) {
 
   const [transactions, setTransactions] = useState(null as t.TransactionSummary[] | null)
 
-  useEffect(() => {
-    if (!categoryGroups) {
-      props.client.getCategoryGroups(budgetId).then((data) => setCategoryGroups(data.category_groups))
-    }
-
-    if (!accounts) {
-      props.client.getAccounts(budgetId).then((data) => setAccounts(data.accounts))
-    }
-
-    if (!transactions) {
-      props.client.getTransactions(budgetId).then((data) => setTransactions(data.transactions))
-    }
-  }, [props.client, budgetId, categoryGroups, accounts, transactions])
+  const [payees, setPayees] = useState(null as t.Payee[] | null)
 
   // Filters
 
@@ -87,7 +76,7 @@ function Transactions(props: Props) {
   })
 
   const [selectedAccountIds, setSelectedAccountIds] = useState(() => {
-    const storedIds = localStorage.getItem(storageKeys.accountIds)
+    const storedIds = localStorage.getItem(storageKeys.selectedAccountIds)
     if (storedIds) {
       return new Set<string>(JSON.parse(storedIds))
     }
@@ -96,7 +85,16 @@ function Transactions(props: Props) {
   })
 
   const [selectedCategoryIds, setSelectedCategoryIds] = useState(() => {
-    const storedIds = localStorage.getItem(storageKeys.categoryIds)
+    const storedIds = localStorage.getItem(storageKeys.selectedCategoryIds)
+    if (storedIds) {
+      return new Set<string>(JSON.parse(storedIds))
+    }
+
+    return new Set<string>([])
+  })
+
+  const [selectedPayeeIds, setSelectedPayeeIds] = useState(() => {
+    const storedIds = localStorage.getItem(storageKeys.selectedPayeeIds)
     if (storedIds) {
       return new Set<string>(JSON.parse(storedIds))
     }
@@ -113,6 +111,32 @@ function Transactions(props: Props) {
     return new Set<string>([])
   })
 
+  // Fetch budget items from server
+  useEffect(() => {
+    if (!categoryGroups) {
+      props.client.getCategoryGroups(budgetId).then((data) => setCategoryGroups(data.category_groups))
+    }
+
+    if (!accounts) {
+      props.client.getAccounts(budgetId).then((data) => {
+        setAccounts(data.accounts)
+        setSelectedAccountIds(new Set(data.accounts.map((account) => account.id)))
+      })
+    }
+
+    if (!payees) {
+      props.client.getPayees(budgetId).then((data) => {
+        const sortedPayees = data.payees.sort((a, b) => (a.name < b.name ? -1 : a.name === b.name ? 0 : 1))
+        setPayees(sortedPayees)
+        setSelectedPayeeIds(new Set(data.payees.map(({ id }) => id)))
+      })
+    }
+
+    if (!transactions) {
+      props.client.getTransactions(budgetId).then((data) => setTransactions(data.transactions))
+    }
+  }, [props.client, budgetId, categoryGroups, accounts, payees, transactions])
+
   useEffect(() => {
     if (fromDate) {
       localStorage.setItem(storageKeys.dateRangeFrom, fromDate.toISOString())
@@ -128,12 +152,22 @@ function Transactions(props: Props) {
 
     localStorage.setItem(storageKeys.showTransfers, JSON.stringify(showTransfers))
 
-    localStorage.setItem(storageKeys.accountIds, JSON.stringify(Array.from(selectedAccountIds)))
+    localStorage.setItem(storageKeys.selectedAccountIds, JSON.stringify(Array.from(selectedAccountIds)))
 
-    localStorage.setItem(storageKeys.categoryIds, JSON.stringify(Array.from(selectedCategoryIds)))
+    localStorage.setItem(storageKeys.selectedCategoryIds, JSON.stringify(Array.from(selectedCategoryIds)))
+
+    localStorage.setItem(storageKeys.selectedPayeeIds, JSON.stringify(Array.from(selectedPayeeIds)))
 
     localStorage.setItem(storageKeys.selectedTransactions, JSON.stringify(Array.from(selectedTransactionIds)))
-  }, [fromDate, toDate, showTransfers, selectedAccountIds, selectedCategoryIds, selectedTransactionIds])
+  }, [
+    fromDate,
+    toDate,
+    showTransfers,
+    selectedAccountIds,
+    selectedCategoryIds,
+    selectedPayeeIds,
+    selectedTransactionIds,
+  ])
 
   const filteredTransactions: t.TransactionSummary[] = useMemo(() => {
     if (!transactions) {
@@ -162,9 +196,21 @@ function Transactions(props: Props) {
         return false
       }
 
+      if (!selectedPayeeIds.has(trx.payee_id)) {
+        return false
+      }
+
       return true
     })
-  }, [transactions, fromDate, toDate, showTransfers, selectedAccountIds, selectedCategoryIds])
+  }, [
+    transactions,
+    fromDate,
+    toDate,
+    showTransfers,
+    selectedAccountIds,
+    selectedCategoryIds,
+    selectedPayeeIds,
+  ])
 
   function handleSelectTransaction(transactionIds: string[], targetId: string) {
     const isRemove = selectedTransactionIds.has(targetId)
@@ -181,9 +227,11 @@ function Transactions(props: Props) {
 
   const getCategoryName = (categoryId: string) => categoriesMap.get(categoryId)?.name || categoryId
 
-  if (!categoryGroups || !accounts || !transactions) {
+  if (!categoryGroups || !accounts || !payees || !transactions) {
     return <span>Loading...</span>
   }
+
+  const selectedTransactions = transactions.filter((tr) => selectedTransactionIds.has(tr.id))
 
   // Other filters: memo, flags, amount range, payees
   return (
@@ -254,6 +302,19 @@ function Transactions(props: Props) {
             onChange={(selection) => setSelectedCategoryIds(selection.selectedIds)}
           />
         </cards.Section>
+        <cards.Section>
+          <CheckboxList
+            id="payees"
+            name="payees"
+            label="Payees"
+            items={payees.map(({ id, name }) => ({ id, name }))}
+            className="p-transactions-checkboxList"
+            labelClassName="p-transactions-filterHeading"
+            listClassName="p-transactions-checkboxList-list"
+            value={selectedPayeeIds}
+            onChange={(selection) => setSelectedPayeeIds(selection.selectedIds)}
+          />
+        </cards.Section>
       </cards.Card>
       <SectionTitle>
         Transactions ({selectedTransactionIds.size}/{filteredTransactions.length})
@@ -265,6 +326,10 @@ function Transactions(props: Props) {
           onSelect={handleSelectTransaction}
           selectedTransactionIds={selectedTransactionIds}
         />
+      </div>
+      <SectionTitle>Selected Transactions ({selectedTransactions.length})</SectionTitle>
+      <div className="p-transactions-window">
+        <TransactionsList transactions={selectedTransactions} getCategoryName={getCategoryName} />
       </div>
     </>
   )
