@@ -4,7 +4,7 @@ import type * as t from './types'
 
 export default class Client {
   private accessToken: string = ''
-  private baseUrl = 'https://api.youneedabudget.com/v1'
+  private baseUrl = 'https://api.ynab.com/v1'
 
   constructor(accessToken?: string) {
     if (accessToken) {
