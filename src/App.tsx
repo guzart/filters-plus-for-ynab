@@ -10,7 +10,7 @@ import './App.scss'
 const CLIENT_ID = '71591f4ec6dae7f1ff9a3b58f5a33064478f1b56f3e5a1642352292580bc88a3'
 
 const redirectUrl = window.location.origin + window.location.pathname
-const authorizationUrl = `https://app.youneedabudget.com/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirectUrl}&response_type=token`
+const authorizationUrl = `https://app.ynab.com/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirectUrl}&response_type=token`
 const client = new Client()
 
 function App() {
