@@ -6,7 +6,7 @@ export default class Client {
   private accessToken: string = ''
   private baseUrl = 'https://api.ynab.com/v1'
 
-  constructor(accessToken?: string) {
+  constructor(accessToken: string) {
     if (accessToken) {
       this.accessToken = accessToken
     }
@@ -25,9 +25,7 @@ export default class Client {
   }
 
   async getTransactions(budgetId: string) {
-    return await this.getRequest<{ transactions: t.TransactionSummary[] }>(
-      `/budgets/${budgetId}/transactions`,
-    )
+    return await this.getRequest<{ transactions: t.TransactionSummary[] }>(`/budgets/${budgetId}/transactions`)
   }
 
   async getCategoryGroups(budgetId: string) {
@@ -37,15 +35,11 @@ export default class Client {
   }
 
   async getAccounts(budgetId: string) {
-    return await this.getRequest<{ accounts: t.Account[] }>(
-      `/budgets/${budgetId}/accounts`,
-    )
+    return await this.getRequest<{ accounts: t.Account[] }>(`/budgets/${budgetId}/accounts`)
   }
 
   async getPayees(budgetId: string) {
-    return await this.getRequest<{ payees: t.Payee[] }>(
-      `/budgets/${budgetId}/payees`,
-    )
+    return await this.getRequest<{ payees: t.Payee[] }>(`/budgets/${budgetId}/payees`)
   }
 
   private async getRequest<T>(urlPath: string) {

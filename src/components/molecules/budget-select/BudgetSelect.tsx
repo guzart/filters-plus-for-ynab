@@ -2,7 +2,7 @@ import { PropsWithoutRef, useEffect, useState } from 'react'
 import Client from '../../../lib/ynab-api/client'
 import { BudgetSummary } from '../../../lib/ynab-api/types'
 
-import './BudgetSelect.css'
+import { Button } from '@radix-ui/themes'
 
 type Props = PropsWithoutRef<{
   client: Client
@@ -34,14 +34,14 @@ function BudgetSelect(props: Props) {
   }, [budgets, props.client])
 
   return (
-    <div className="m-budgetSelect">
-      <span>Select your budget:</span>
-      <ul className="m-budgetSelecti-list">
+    <div>
+      <p className="text-lg font-bold mb-4">Select your budget</p>
+      <ul className="flex flex-row justify-center gap-2">
         {budgets.map((budget) => (
-          <li className="m-budgetSelect-item" key={budget.id}>
-            <button className="m-budgetSelect-button" onClick={() => props.onSelect(budget.id)}>
+          <li key={budget.id}>
+            <Button onClick={() => props.onSelect(budget.id)}>
               {budget.name}
-            </button>
+            </Button>
           </li>
         ))}
       </ul>

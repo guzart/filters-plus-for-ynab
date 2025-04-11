@@ -2,33 +2,99 @@ import flatMap from 'lodash/flatMap'
 import { PropsWithoutRef, useEffect, useMemo, useState } from 'react'
 import { toUTCDateString } from '../../../lib/helpers/format'
 import type Client from '../../../lib/ynab-api/client'
-import type * as t from '../../../lib/ynab-api/types'
 import Toggle from '../../atoms/toggle/Toggle'
 import * as cards from '../../atoms/card'
 import SectionTitle from '../../atoms/section-title/SectionTitle'
 import CheckboxList from '../../molecules/checkbox-list/CheckboxList'
 import TransactionsList from '../../molecules/transactions-list/TransactionsList'
+import type { Account, CategoryGroupWithCategories, Payee, TransactionSummary } from '@/lib/ynab-api/types'
 
 import './Transactions.css'
 
 type Props = PropsWithoutRef<{ budgetId: string; client: Client }>
 
-const storageKeys = {
-  dateRangeFrom: 'fromDateFilter',
-  dateRangeTo: 'toDateFilter',
-  selectedAccountIds: 'selectedAccountIds',
-  selectedCategoryIds: 'selectedCategoryIds',
-  selectedPayeeIds: 'selectedPayeeIds',
-  selectedTransactions: 'selectedTransactions',
-  showTransfers: 'showTransfersFilter',
+const SETTINGS_STORAGE_KEYS = {
+  dateRangeFrom: 'fp_fromDateFilter',
+  dateRangeTo: 'fp_toDateFilter',
+  selectedAccountIds: 'fp_selectedAccountIds',
+  selectedCategoryIds: 'fp_selectedCategoryIds',
+  selectedPayeeIds: 'fp_selectedPayeeIds',
+  selectedTransactions: 'fp_selectedTransactions',
+  showTransfers: 'fp_showTransfersFilter',
+}
+
+type SettingStorageKeys = keyof typeof SETTINGS_STORAGE_KEYS
+
+const ENTITIES_STORAGE_KEYS = {
+  categoryGroups: 'fp_categoryGroups',
+  accounts: 'fp_accounts',
+  transactions: 'fp_transactions',
+  payees: 'fp_payees',
+}
+
+type EntityStorageKeys = keyof typeof ENTITIES_STORAGE_KEYS
+
+interface FetchEntityProps<K extends EntityStorageKeys, T> {
+  storageKey: K
+  request: () => Promise<T>
+  setState: (state: T | null) => void
+  isLoading: Record<K, boolean>
+  setIsLoading: (isLoading: Record<K, boolean>) => void
+}
+
+function fetchEntity<K extends EntityStorageKeys, T>({
+  storageKey,
+  request,
+  setState,
+  isLoading,
+  setIsLoading,
+}: FetchEntityProps<K, T>) {
+  const storedEntity = localStorage.getItem(storageKey)
+  if (storedEntity) {
+    setState(JSON.parse(storedEntity))
+  } else if (!isLoading[storageKey]) {
+    setIsLoading({ ...isLoading, [storageKey]: true })
+    request().then((data) => {
+      setState(data)
+      localStorage.setItem(storageKey, JSON.stringify(data))
+      setIsLoading({ ...isLoading, [storageKey]: false })
+    })
+  }
+}
+
+interface LoadSettingProps<T> {
+  defaultValue: T
+}
+
+function loadSetting<T, K extends SettingStorageKeys = SettingStorageKeys>(
+  storageKey: K,
+  { defaultValue }: LoadSettingProps<T>,
+): () => T {
+  return () => {
+    const storedValue = localStorage.getItem(storageKey)
+    if (storedValue) {
+      return JSON.parse(storedValue)
+    }
+
+    return defaultValue
+  }
 }
 
 function Transactions(props: Props) {
   const { budgetId } = props
 
   // Budget Entities
+  const [categoryGroups, setCategoryGroups] = useState(null as CategoryGroupWithCategories[] | null)
+  const [accounts, setAccounts] = useState(null as Account[] | null)
+  const [transactions, setTransactions] = useState(null as TransactionSummary[] | null)
+  const [payees, setPayees] = useState(null as Payee[] | null)
+  const [isLoading, setIsLoading] = useState<Record<EntityStorageKeys, boolean>>({
+    categoryGroups: false,
+    accounts: false,
+    transactions: false,
+    payees: false,
+  })
 
-  const [categoryGroups, setCategoryGroups] = useState(null as t.CategoryGroupWithCategories[] | null)
   const categoriesMap = useMemo(() => {
     const output = new Map<string, { name: string }>()
     categoryGroups?.forEach((group) => {
@@ -40,125 +106,74 @@ function Transactions(props: Props) {
     return output
   }, [categoryGroups])
 
-  const [accounts, setAccounts] = useState(null as t.Account[] | null)
-
-  const [transactions, setTransactions] = useState(null as t.TransactionSummary[] | null)
-
-  const [payees, setPayees] = useState(null as t.Payee[] | null)
-
   // Filters
 
-  const [fromDate, setFromDate] = useState(() => {
-    const storedFromDate = localStorage.getItem(storageKeys.dateRangeFrom)
-    if (storedFromDate) {
-      return new Date(storedFromDate)
-    }
-
-    return null
-  })
-
-  const [toDate, setToDate] = useState(() => {
-    const storedToDate = localStorage.getItem(storageKeys.dateRangeTo)
-    if (storedToDate) {
-      return new Date(storedToDate)
-    }
-
-    return null
-  })
-
-  const [showTransfers, setShowTransfers] = useState(() => {
-    const storedValue = localStorage.getItem(storageKeys.showTransfers)
-    if (storedValue) {
-      return storedValue !== 'false'
-    }
-
-    return true
-  })
-
-  const [selectedAccountIds, setSelectedAccountIds] = useState(() => {
-    const storedIds = localStorage.getItem(storageKeys.selectedAccountIds)
-    if (storedIds) {
-      return new Set<string>(JSON.parse(storedIds))
-    }
-
-    return new Set<string>([])
-  })
-
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState(() => {
-    const storedIds = localStorage.getItem(storageKeys.selectedCategoryIds)
-    if (storedIds) {
-      return new Set<string>(JSON.parse(storedIds))
-    }
-
-    return new Set<string>([])
-  })
-
-  const [selectedPayeeIds, setSelectedPayeeIds] = useState(() => {
-    const storedIds = localStorage.getItem(storageKeys.selectedPayeeIds)
-    if (storedIds) {
-      return new Set<string>(JSON.parse(storedIds))
-    }
-
-    return new Set<string>([])
-  })
-
-  const [selectedTransactionIds, setSelectedTransactionIds] = useState(() => {
-    const storedIds = localStorage.getItem(storageKeys.selectedTransactions)
-    if (storedIds) {
-      return new Set<string>(JSON.parse(storedIds))
-    }
-
-    return new Set<string>([])
-  })
+  const [fromDate, setFromDate] = useState(loadSetting<Date | null>('dateRangeFrom', { defaultValue: null }))
+  const [toDate, setToDate] = useState(loadSetting<Date | null>('dateRangeTo', { defaultValue: null }))
+  const [showTransfers, setShowTransfers] = useState(loadSetting('showTransfers', { defaultValue: true }))
+  const [selectedAccountIds, setSelectedAccountIds] = useState(
+    loadSetting('selectedAccountIds', { defaultValue: new Set<string>([]) }),
+  )
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState(
+    loadSetting('selectedCategoryIds', { defaultValue: new Set<string>([]) }),
+  )
+  const [selectedPayeeIds, setSelectedPayeeIds] = useState(
+    loadSetting('selectedPayeeIds', { defaultValue: new Set<string>([]) }),
+  )
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState(
+    loadSetting('selectedTransactions', { defaultValue: new Set<string>([]) }),
+  )
 
   // Fetch budget items from server
   useEffect(() => {
-    if (!categoryGroups) {
-      props.client.getCategoryGroups(budgetId).then((data) => setCategoryGroups(data.category_groups))
-    }
+    fetchEntity({
+      storageKey: 'categoryGroups',
+      request: () => props.client.getCategoryGroups(budgetId).then((data) => data.category_groups),
+      setState: setCategoryGroups,
+      isLoading,
+      setIsLoading,
+    })
 
-    if (!accounts) {
-      props.client.getAccounts(budgetId).then((data) => {
-        setAccounts(data.accounts)
-        setSelectedAccountIds(new Set(data.accounts.map((account) => account.id)))
-      })
-    }
+    // fetchEntity({
+    //   storageKey: 'accounts',
+    //   request: () => props.client.getAccounts(budgetId).then((data) => data.accounts),
+    //   setState: setAccounts,
+    //   isLoading, setIsLoading
+    // })
 
-    if (!payees) {
-      props.client.getPayees(budgetId).then((data) => {
-        const sortedPayees = data.payees.sort((a, b) => (a.name < b.name ? -1 : a.name === b.name ? 0 : 1))
-        setPayees(sortedPayees)
-        setSelectedPayeeIds(new Set(data.payees.map(({ id }) => id)))
-      })
-    }
+    // fetchEntity({
+    //   storageKey: 'payees',
+    //   request: () => props.client.getPayees(budgetId).then((data) => data.payees),
+    //   setState: setPayees,
+    //   isLoading, setIsLoading
+    // })
 
-    if (!transactions) {
-      props.client.getTransactions(budgetId).then((data) => setTransactions(data.transactions))
-    }
+    // fetchEntity({
+    //   storageKey: 'transactions',
+    //   request: () => props.client.getTransactions(budgetId).then((data) => data.transactions),
+    //   setState: setTransactions,
+    //   isLoading, setIsLoading
+    // })
   }, [props.client, budgetId, categoryGroups, accounts, payees, transactions])
 
   useEffect(() => {
     if (fromDate) {
-      localStorage.setItem(storageKeys.dateRangeFrom, fromDate.toISOString())
+      localStorage.setItem(SETTINGS_STORAGE_KEYS.dateRangeFrom, fromDate.toISOString())
     } else {
-      localStorage.removeItem(storageKeys.dateRangeFrom)
+      localStorage.removeItem(SETTINGS_STORAGE_KEYS.dateRangeFrom)
     }
 
     if (toDate) {
-      localStorage.setItem(storageKeys.dateRangeTo, toDate.toISOString())
+      localStorage.setItem(SETTINGS_STORAGE_KEYS.dateRangeTo, toDate.toISOString())
     } else {
-      localStorage.removeItem(storageKeys.dateRangeTo)
+      localStorage.removeItem(SETTINGS_STORAGE_KEYS.dateRangeTo)
     }
 
-    localStorage.setItem(storageKeys.showTransfers, JSON.stringify(showTransfers))
-
-    localStorage.setItem(storageKeys.selectedAccountIds, JSON.stringify(Array.from(selectedAccountIds)))
-
-    localStorage.setItem(storageKeys.selectedCategoryIds, JSON.stringify(Array.from(selectedCategoryIds)))
-
-    localStorage.setItem(storageKeys.selectedPayeeIds, JSON.stringify(Array.from(selectedPayeeIds)))
-
-    localStorage.setItem(storageKeys.selectedTransactions, JSON.stringify(Array.from(selectedTransactionIds)))
+    localStorage.setItem(SETTINGS_STORAGE_KEYS.showTransfers, JSON.stringify(showTransfers))
+    localStorage.setItem(SETTINGS_STORAGE_KEYS.selectedAccountIds, JSON.stringify(Array.from(selectedAccountIds)))
+    localStorage.setItem(SETTINGS_STORAGE_KEYS.selectedCategoryIds, JSON.stringify(Array.from(selectedCategoryIds)))
+    localStorage.setItem(SETTINGS_STORAGE_KEYS.selectedPayeeIds, JSON.stringify(Array.from(selectedPayeeIds)))
+    localStorage.setItem(SETTINGS_STORAGE_KEYS.selectedTransactions, JSON.stringify(Array.from(selectedTransactionIds)))
   }, [
     fromDate,
     toDate,
@@ -169,7 +184,7 @@ function Transactions(props: Props) {
     selectedTransactionIds,
   ])
 
-  const filteredTransactions: t.TransactionSummary[] = useMemo(() => {
+  const filteredTransactions: TransactionSummary[] = useMemo(() => {
     if (!transactions) {
       return []
     }
@@ -202,15 +217,7 @@ function Transactions(props: Props) {
 
       return true
     })
-  }, [
-    transactions,
-    fromDate,
-    toDate,
-    showTransfers,
-    selectedAccountIds,
-    selectedCategoryIds,
-    selectedPayeeIds,
-  ])
+  }, [transactions, fromDate, toDate, showTransfers, selectedAccountIds, selectedCategoryIds, selectedPayeeIds])
 
   function handleSelectTransaction(transactionIds: string[], targetId: string) {
     const isRemove = selectedTransactionIds.has(targetId)
@@ -246,7 +253,7 @@ function Transactions(props: Props) {
             value={toUTCDateString(fromDate)}
             onChange={(ev) => setFromDate(ev.target.valueAsDate)}
           />
-          <span className="inline-block mx-5"> – </span>
+          <span className="mx-5 inline-block"> – </span>
           <input
             className="p-transactions-dateInput"
             type="date"
@@ -255,12 +262,8 @@ function Transactions(props: Props) {
           />
         </cards.Section>
         <cards.Section>
-          <div className="flex items-center mt-4">
-            <Toggle
-              label="Show Transfer"
-              value={showTransfers}
-              onChange={(checked) => setShowTransfers(checked)}
-            />
+          <div className="mt-4 flex items-center">
+            <Toggle label="Show Transfer" value={showTransfers} onChange={(checked) => setShowTransfers(checked)} />
             <h3
               className="p-transactions-filterHeading mod-toggleLabel"
               onClick={() => setShowTransfers(!showTransfers)}
