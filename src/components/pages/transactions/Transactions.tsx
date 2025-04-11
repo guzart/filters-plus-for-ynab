@@ -1,38 +1,19 @@
 import flatMap from 'lodash/flatMap'
 import { PropsWithoutRef, useEffect, useMemo, useState } from 'react'
-import { toUTCDateString } from '../../../lib/helpers/format'
-import type Client from '../../../lib/ynab-api/client'
-import Toggle from '../../atoms/toggle/Toggle'
-import * as cards from '../../atoms/card'
-import SectionTitle from '../../atoms/section-title/SectionTitle'
-import CheckboxList from '../../molecules/checkbox-list/CheckboxList'
-import TransactionsList from '../../molecules/transactions-list/TransactionsList'
+
+import { toUTCDateString } from '@/lib/helpers/format'
+import type Client from '@/lib/ynab-api/client'
+import Toggle from '@/components/atoms/toggle/Toggle'
+import * as cards from '@/components/atoms/card'
+import SectionTitle from '@/components/atoms/section-title/SectionTitle'
+import CheckboxList from '@/components/molecules/checkbox-list/CheckboxList'
+import TransactionsList from '@/components/molecules/transactions-list/TransactionsList'
 import type { Account, CategoryGroupWithCategories, Payee, TransactionSummary } from '@/lib/ynab-api/types'
+import { EntityStorageKeys, SETTINGS_STORAGE_KEYS, SettingStorageKeys } from '@/lib/constants'
 
 import './Transactions.css'
 
 type Props = PropsWithoutRef<{ budgetId: string; client: Client }>
-
-const SETTINGS_STORAGE_KEYS = {
-  dateRangeFrom: 'fp_fromDateFilter',
-  dateRangeTo: 'fp_toDateFilter',
-  selectedAccountIds: 'fp_selectedAccountIds',
-  selectedCategoryIds: 'fp_selectedCategoryIds',
-  selectedPayeeIds: 'fp_selectedPayeeIds',
-  selectedTransactions: 'fp_selectedTransactions',
-  showTransfers: 'fp_showTransfersFilter',
-}
-
-type SettingStorageKeys = keyof typeof SETTINGS_STORAGE_KEYS
-
-const ENTITIES_STORAGE_KEYS = {
-  categoryGroups: 'fp_categoryGroups',
-  accounts: 'fp_accounts',
-  transactions: 'fp_transactions',
-  payees: 'fp_payees',
-}
-
-type EntityStorageKeys = keyof typeof ENTITIES_STORAGE_KEYS
 
 interface FetchEntityProps<K extends EntityStorageKeys, T> {
   storageKey: K
@@ -134,26 +115,29 @@ function Transactions(props: Props) {
       setIsLoading,
     })
 
-    // fetchEntity({
-    //   storageKey: 'accounts',
-    //   request: () => props.client.getAccounts(budgetId).then((data) => data.accounts),
-    //   setState: setAccounts,
-    //   isLoading, setIsLoading
-    // })
+    fetchEntity({
+      storageKey: 'accounts',
+      request: () => props.client.getAccounts(budgetId).then((data) => data.accounts),
+      setState: setAccounts,
+      isLoading,
+      setIsLoading,
+    })
 
-    // fetchEntity({
-    //   storageKey: 'payees',
-    //   request: () => props.client.getPayees(budgetId).then((data) => data.payees),
-    //   setState: setPayees,
-    //   isLoading, setIsLoading
-    // })
+    fetchEntity({
+      storageKey: 'payees',
+      request: () => props.client.getPayees(budgetId).then((data) => data.payees),
+      setState: setPayees,
+      isLoading,
+      setIsLoading,
+    })
 
-    // fetchEntity({
-    //   storageKey: 'transactions',
-    //   request: () => props.client.getTransactions(budgetId).then((data) => data.transactions),
-    //   setState: setTransactions,
-    //   isLoading, setIsLoading
-    // })
+    fetchEntity({
+      storageKey: 'transactions',
+      request: () => props.client.getTransactions(budgetId).then((data) => data.transactions),
+      setState: setTransactions,
+      isLoading,
+      setIsLoading,
+    })
   }, [props.client, budgetId, categoryGroups, accounts, payees, transactions])
 
   useEffect(() => {

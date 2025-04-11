@@ -4,15 +4,11 @@ import { Container, Link, Theme } from '@radix-ui/themes'
 import BudgetSelect from './components/molecules/budget-select/BudgetSelect'
 import Transactions from './components/pages/transactions/Transactions'
 import Client from './lib/ynab-api/client'
-
-const ACCESS_TOKEN_KEY = 'fp_accessToken'
-const ACTIVE_BUDGET_ID_KEY = 'fp_activeBudgetId'
-
-const CLIENT_ID = '71591f4ec6dae7f1ff9a3b58f5a33064478f1b56f3e5a1642352292580bc88a3'
+import { buildAuthorizationUrl } from './lib/helpers/ynab'
+import { CLIENT_ID, ACCESS_TOKEN_KEY, ACTIVE_BUDGET_ID_KEY } from './lib/constants'
 
 const redirectUrl = window.location.origin + window.location.pathname
-const authorizationUrl = `https://app.ynab.com/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirectUrl}&response_type=token`
-let client: Client | null = null
+const authorizationUrl = buildAuthorizationUrl({ clientId: CLIENT_ID, redirectUrl })
 
 interface InitializeProps {
   accessToken: string
@@ -43,27 +39,32 @@ function App() {
   const [isInitializing, setIsInitializing] = useState(true)
   const [accessToken, setAccessToken] = useState(null as string | null)
   const [activeBudgetId, setActiveBudgetId] = useState(null as string | null)
+  const [client, setClient] = useState(null as Client | null)
 
   useEffect(() => {
     const initializeAuth = async () => {
       const storedToken = localStorage.getItem(ACCESS_TOKEN_KEY)
       if (storedToken) {
-        client = await initialize({
-          accessToken: storedToken,
-          setAccessToken,
-          setIsInitializing,
-        })
+        setClient(
+          await initialize({
+            accessToken: storedToken,
+            setAccessToken,
+            setIsInitializing,
+          }),
+        )
         return
       }
 
       const accessTokenParam = getAccessTokenFromLocationHash()
       if (accessTokenParam) {
         clearLocationHash()
-        client = await initialize({
-          accessToken: accessTokenParam,
-          setAccessToken,
-          setIsInitializing,
-        })
+        setClient(
+          await initialize({
+            accessToken: accessTokenParam,
+            setAccessToken,
+            setIsInitializing,
+          }),
+        )
         return
       }
 
