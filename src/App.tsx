@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
+import { Container, Link, Theme } from '@radix-ui/themes'
 
-import Button from './components/atoms/button/Button'
-import Container from './components/atoms/container/Container'
 import BudgetSelect from './components/molecules/budget-select/BudgetSelect'
 import Transactions from './components/pages/transactions/Transactions'
 import Client from './lib/ynab-api/client'
 import './App.scss'
+
+const ACCESS_TOKEN_KEY = 'fp__accessToken'
+const ACTIVE_BUDGET_ID_KEY = 'fp__activeBudgetId'
 
 const CLIENT_ID = '71591f4ec6dae7f1ff9a3b58f5a33064478f1b56f3e5a1642352292580bc88a3'
 
@@ -16,9 +18,10 @@ const client = new Client()
 function App() {
   const [isInitializing, setIsInitializing] = useState(true)
   const [accessToken, setAccessToken] = useState(null as string | null)
+  const [activeBudgetId, setActiveBudgetId] = useState(null as string | null)
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('accessToken')
+    const storedToken = localStorage.getItem(ACCESS_TOKEN_KEY)
     if (storedToken) {
       client.updateAccessToken(storedToken)
       client
@@ -27,7 +30,7 @@ function App() {
           setAccessToken(storedToken)
         })
         .catch((_err) => {
-          localStorage.removeItem('accessToken')
+          localStorage.removeItem(ACCESS_TOKEN_KEY)
           setAccessToken(null)
         })
         .finally(() => {
@@ -38,7 +41,7 @@ function App() {
       const params = new URLSearchParams(hash)
       const accessTokenParam = params.get('access_token')
       if (accessTokenParam) {
-        localStorage.setItem('accessToken', accessTokenParam)
+        localStorage.setItem(ACCESS_TOKEN_KEY, accessTokenParam)
         window.location.href = redirectUrl
       }
 
@@ -46,41 +49,49 @@ function App() {
     }
   }, [accessToken])
 
-  const [activeBudgetId, setActiveBudgetId] = useState(null as string | null)
-
   useEffect(() => {
-    const budgetId = localStorage.getItem('activeBudgetId')
+    const budgetId = localStorage.getItem(ACTIVE_BUDGET_ID_KEY)
     if (budgetId) {
       setActiveBudgetId(budgetId)
     } else if (activeBudgetId) {
-      localStorage.setItem('activeBudgetId', activeBudgetId)
+      localStorage.setItem(ACTIVE_BUDGET_ID_KEY, activeBudgetId)
     }
   }, [activeBudgetId])
 
-  if (isInitializing) {
-    return <div>Initializing...</div>
-  }
+  const renderContent = () => {
+    if (isInitializing) {
+      return <div>Initializing...</div>
+    }
 
-  if (!accessToken) {
-    return (
-      <div className="app-authorize">
-        <Button href={authorizationUrl}>Connect with YNAB</Button>
-      </div>
-    )
-  }
+    if (!accessToken) {
+      return (
+        <div className="text-center">
+          <Link href={authorizationUrl}>Connect with YNAB</Link>
+        </div>
+      )
+    }
 
-  if (!activeBudgetId) {
+    if (!activeBudgetId) {
+      return (
+        <div className="app-budgets">
+          <BudgetSelect client={client} onSelect={(budgetId: string) => setActiveBudgetId(budgetId)} />
+        </div>
+      )
+    }
+
     return (
-      <div className="app-budgets">
-        <BudgetSelect client={client} onSelect={(budgetId: string) => setActiveBudgetId(budgetId)} />
+      <div className="app-transactions">
+        <Transactions budgetId={activeBudgetId} client={client} />
       </div>
     )
   }
 
   return (
-    <Container className="app-transactions">
-      <Transactions budgetId={activeBudgetId} client={client} />
-    </Container>
+    <Theme>
+      <Container>
+        {renderContent()}
+      </Container>
+    </Theme>
   )
 }
 
