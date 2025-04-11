@@ -1,5 +1,7 @@
+@import 'tailwindcss';
+
 .m-transactionsList-item {
-  @apply block relative;
+  @apply relative block;
 
   &:hover {
     @apply bg-gray-50;
@@ -10,7 +12,7 @@
   }
 
   &-wrapper {
-    @apply px-4 py-4 border-transparent border-l-4;
+    @apply border-l-4 border-transparent px-4 py-4;
     @apply flex justify-between;
 
     &.mod-red {
@@ -39,6 +41,6 @@
   }
 
   &-selectedIcon {
-    @apply text-green-600 absolute bottom-2 right-4;
+    @apply absolute bottom-2 right-4 text-green-600;
   }
 }

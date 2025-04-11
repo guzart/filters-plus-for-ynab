@@ -1,9 +1,11 @@
+@import 'tailwindcss';
+
 .p-transactions {
   &-filterHeading {
-    @apply text-base font-medium text-gray-900 leading-6 mb-2;
+    @apply mb-2 text-base font-medium leading-6 text-gray-900;
 
     &.mod-toggleLabel {
-      @apply inline-block ml-2 mb-0 cursor-pointer;
+      @apply mb-0 ml-2 inline-block cursor-pointer;
     }
   }
 
@@ -12,7 +14,7 @@
     @apply px-1 py-1 text-center;
 
     &:focus {
-      @apply ring-green-500 border-green-500;
+      @apply border-green-500 ring-green-500;
     }
   }
 

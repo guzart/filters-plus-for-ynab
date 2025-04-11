@@ -1,6 +1,6 @@
 import { MouseEvent, PropsWithoutRef, useRef, useState } from 'react'
 import compact from 'lodash/compact'
-import './CheckboxList.scss'
+import './CheckboxList.css'
 
 interface Item {
   id: string

@@ -1,7 +1,7 @@
 import { HTMLProps } from 'react'
 import { TransactionSummary } from '../../../lib/ynab-api/types'
 import Icon from '../../atoms/icon/Icon'
-import './TransactionItem.scss'
+import './TransactionItem.css'
 
 type Props = HTMLProps<HTMLLIElement> & {
   transaction: TransactionSummary

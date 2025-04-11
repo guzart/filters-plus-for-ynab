@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+
+.a-panel {
+  @apply divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow;
+}

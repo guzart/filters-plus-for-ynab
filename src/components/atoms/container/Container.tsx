@@ -1,6 +1,6 @@
 import { HTMLProps } from 'react'
 
-import './Container.scss'
+import './Container.css'
 
 type Props = HTMLProps<HTMLDivElement>
 

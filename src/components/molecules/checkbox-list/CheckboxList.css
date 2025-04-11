@@ -1,10 +1,12 @@
+@import 'tailwindcss';
+
 .m-checkboxList {
   &-label {
     @apply text-base font-medium text-gray-900;
   }
 
   &-input {
-    @apply text-green-600 border-gray-300 rounded;
+    @apply rounded border-gray-300 text-green-600;
     @apply h-4 w-4;
 
     &:focus {

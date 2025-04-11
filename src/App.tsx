@@ -4,7 +4,6 @@ import { Container, Link, Theme } from '@radix-ui/themes'
 import BudgetSelect from './components/molecules/budget-select/BudgetSelect'
 import Transactions from './components/pages/transactions/Transactions'
 import Client from './lib/ynab-api/client'
-import './App.scss'
 
 const ACCESS_TOKEN_KEY = 'fp__accessToken'
 const ACTIVE_BUDGET_ID_KEY = 'fp__activeBudgetId'
@@ -65,7 +64,7 @@ function App() {
 
     if (!accessToken) {
       return (
-        <div className="text-center">
+        <div className="flex h-screen items-center justify-center">
           <Link href={authorizationUrl}>Connect with YNAB</Link>
         </div>
       )
@@ -73,14 +72,14 @@ function App() {
 
     if (!activeBudgetId) {
       return (
-        <div className="app-budgets">
+        <div>
           <BudgetSelect client={client} onSelect={(budgetId: string) => setActiveBudgetId(budgetId)} />
         </div>
       )
     }
 
     return (
-      <div className="app-transactions">
+      <div>
         <Transactions budgetId={activeBudgetId} client={client} />
       </div>
     )

@@ -9,7 +9,7 @@ import SectionTitle from '../../atoms/section-title/SectionTitle'
 import CheckboxList from '../../molecules/checkbox-list/CheckboxList'
 import TransactionsList from '../../molecules/transactions-list/TransactionsList'
 
-import './Transactions.scss'
+import './Transactions.css'
 
 type Props = PropsWithoutRef<{ budgetId: string; client: Client }>
 

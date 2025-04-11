@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+.m-budgetSelect {
+  &-item {
+    @apply my-4;
+  }
+
+  &-button {
+    @apply relative block w-full px-6 py-4;
+    @apply cursor-pointer rounded-lg border border-gray-300 bg-white shadow-sm;
+
+    &:hover {
+      @apply border-gray-400;
+    }
+  }
+}

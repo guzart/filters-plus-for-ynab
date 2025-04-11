@@ -1,6 +1,6 @@
-import './Icon.scss'
+import './Icon.css'
 
-import { ReactComponent as CircleCheck } from './circle-check.svg'
+import CircleCheck from './circle-check.svg'
 import { PropsWithoutRef } from 'react'
 
 enum IconName {

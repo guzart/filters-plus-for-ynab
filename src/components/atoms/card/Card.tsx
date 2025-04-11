@@ -1,6 +1,6 @@
 import { HTMLProps } from 'react'
 
-import './Card.scss'
+import './Card.css'
 
 type Props = HTMLProps<HTMLDivElement>
 

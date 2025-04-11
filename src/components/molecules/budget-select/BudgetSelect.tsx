@@ -2,7 +2,7 @@ import { PropsWithoutRef, useEffect, useState } from 'react'
 import Client from '../../../lib/ynab-api/client'
 import { BudgetSummary } from '../../../lib/ynab-api/types'
 
-import './BudgetSelect.scss'
+import './BudgetSelect.css'
 
 type Props = PropsWithoutRef<{
   client: Client

@@ -1,3 +1,5 @@
+@import 'tailwindcss';
+
 .a-card-section {
   @apply px-4 py-5;
 }

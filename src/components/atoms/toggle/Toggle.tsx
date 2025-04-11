@@ -1,5 +1,5 @@
 import { PropsWithRef } from 'react'
-import './Toggle.scss'
+import './Toggle.css'
 
 type Props = PropsWithRef<{
   label: string

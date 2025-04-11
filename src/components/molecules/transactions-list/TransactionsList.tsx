@@ -2,7 +2,7 @@ import { MouseEvent, PropsWithoutRef, useRef, useState } from 'react'
 import type * as t from '../../../lib/ynab-api/types'
 import TransactionsListItem from './TransactionItem'
 
-import './TransactionsList.scss'
+import './TransactionsList.css'
 
 type Props = PropsWithoutRef<{
   className?: string

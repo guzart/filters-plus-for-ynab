@@ -1,6 +1,6 @@
 import { HTMLProps } from 'react'
 
-import './SectionTitle.scss'
+import './SectionTitle.css'
 
 type Props = HTMLProps<HTMLHeadingElement>
 

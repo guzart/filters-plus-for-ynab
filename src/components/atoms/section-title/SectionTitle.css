@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+
+.a-sectionTitle {
+  @apply mb-2 mt-8 px-2 text-xl font-medium leading-6 text-gray-900;
+}
