@@ -23,7 +23,7 @@ interface FetchEntityProps<K extends EntityStorageKeys, T> {
   setIsLoading: (isLoading: Record<K, boolean>) => void
 }
 
-function fetchEntity<K extends EntityStorageKeys, T>({
+function fetchEntities<K extends EntityStorageKeys, T>({
   storageKey,
   request,
   setState,
@@ -107,7 +107,7 @@ function Transactions(props: Props) {
 
   // Fetch budget items from server
   useEffect(() => {
-    fetchEntity({
+    fetchEntities({
       storageKey: 'categoryGroups',
       request: () => props.client.getCategoryGroups(budgetId).then((data) => data.category_groups),
       setState: setCategoryGroups,
@@ -115,7 +115,7 @@ function Transactions(props: Props) {
       setIsLoading,
     })
 
-    fetchEntity({
+    fetchEntities({
       storageKey: 'accounts',
       request: () => props.client.getAccounts(budgetId).then((data) => data.accounts),
       setState: setAccounts,
@@ -123,7 +123,7 @@ function Transactions(props: Props) {
       setIsLoading,
     })
 
-    fetchEntity({
+    fetchEntities({
       storageKey: 'payees',
       request: () => props.client.getPayees(budgetId).then((data) => data.payees),
       setState: setPayees,
@@ -131,7 +131,7 @@ function Transactions(props: Props) {
       setIsLoading,
     })
 
-    fetchEntity({
+    fetchEntities({
       storageKey: 'transactions',
       request: () => props.client.getTransactions(budgetId).then((data) => data.transactions),
       setState: setTransactions,
