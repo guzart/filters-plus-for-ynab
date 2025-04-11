@@ -1,4 +1,4 @@
-import { EntityStorageKeys, SettingStorageKeys } from '../constants'
+import { EntityStorageKeys, FilterStorageKeys } from '../constants'
 
 interface FetchEntityProps<K extends EntityStorageKeys, T> {
   storageKey: K
@@ -29,19 +29,38 @@ export function fetchEntities<K extends EntityStorageKeys, T>({
 }
 
 interface LoadSettingProps<T> {
-  defaultValue: T
+  default: T
 }
 
-export function loadSetting<T, K extends SettingStorageKeys = SettingStorageKeys>(
+export function loadFilter<T, K extends FilterStorageKeys = FilterStorageKeys>(
   storageKey: K,
-  { defaultValue }: LoadSettingProps<T>,
+  props: LoadSettingProps<T>,
 ): () => T {
   return () => {
     const storedValue = localStorage.getItem(storageKey)
     if (storedValue) {
-      return JSON.parse(storedValue)
+      const data = JSON.parse(storedValue)
+      if (props.default && props.default instanceof Set) {
+        return new Set(data)
+      }
+
+      return data ? data : props.default
     }
 
-    return defaultValue
+    return props.default
   }
 }
+
+export function saveFilter<T, K extends FilterStorageKeys = FilterStorageKeys>(storageKey: K, value: T) {
+  if (value) {
+    localStorage.setItem(storageKey, JSON.stringify(value))
+  } else {
+    localStorage.removeItem(storageKey)
+  }
+}
+
+export const loadStringSetFilter = (storageKey: FilterStorageKeys) =>
+  loadFilter(storageKey, { default: new Set([] as string[]) })
+
+export const loadNullableDateFilter = (storageKey: FilterStorageKeys) =>
+  loadFilter<Date | null>(storageKey, { default: null })

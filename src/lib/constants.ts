@@ -2,7 +2,7 @@ export const ACCESS_TOKEN_KEY = 'fp_accessToken'
 export const ACTIVE_BUDGET_ID_KEY = 'fp_activeBudgetId'
 export const CLIENT_ID = '71591f4ec6dae7f1ff9a3b58f5a33064478f1b56f3e5a1642352292580bc88a3'
 
-export const SETTINGS_STORAGE_KEYS = {
+export const FILTERS_STORAGE_KEYS = {
   dateRangeFrom: 'fp_fromDateFilter',
   dateRangeTo: 'fp_toDateFilter',
   selectedAccountIds: 'fp_selectedAccountIds',
@@ -12,7 +12,7 @@ export const SETTINGS_STORAGE_KEYS = {
   showTransfers: 'fp_showTransfersFilter',
 }
 
-export type SettingStorageKeys = keyof typeof SETTINGS_STORAGE_KEYS
+export type FilterStorageKeys = keyof typeof FILTERS_STORAGE_KEYS
 
 export const ENTITIES_STORAGE_KEYS = {
   categoryGroups: 'fp_categoryGroups',

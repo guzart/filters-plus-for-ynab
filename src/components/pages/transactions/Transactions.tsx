@@ -9,8 +9,14 @@ import SectionTitle from '@/components/atoms/section-title/SectionTitle'
 import CheckboxList from '@/components/molecules/checkbox-list/CheckboxList'
 import TransactionsList from '@/components/molecules/transactions-list/TransactionsList'
 import type { Account, CategoryGroupWithCategories, Payee, TransactionSummary } from '@/lib/ynab-api/types'
-import { EntityStorageKeys, SETTINGS_STORAGE_KEYS } from '@/lib/constants'
-import { fetchEntities, loadSetting } from '@/lib/helpers/storage'
+import { EntityStorageKeys } from '@/lib/constants'
+import {
+  fetchEntities,
+  loadFilter as loadFilter,
+  loadNullableDateFilter,
+  loadStringSetFilter,
+  saveFilter,
+} from '@/lib/helpers/storage'
 
 import './Transactions.css'
 
@@ -35,21 +41,13 @@ function Transactions(props: Props) {
 
   // Filters
 
-  const [fromDate, setFromDate] = useState(loadSetting<Date | null>('dateRangeFrom', { defaultValue: null }))
-  const [toDate, setToDate] = useState(loadSetting<Date | null>('dateRangeTo', { defaultValue: null }))
-  const [showTransfers, setShowTransfers] = useState(loadSetting('showTransfers', { defaultValue: true }))
-  const [selectedAccountIds, setSelectedAccountIds] = useState(
-    loadSetting('selectedAccountIds', { defaultValue: new Set<string>([]) }),
-  )
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState(
-    loadSetting('selectedCategoryIds', { defaultValue: new Set<string>([]) }),
-  )
-  const [selectedPayeeIds, setSelectedPayeeIds] = useState(
-    loadSetting('selectedPayeeIds', { defaultValue: new Set<string>([]) }),
-  )
-  const [selectedTransactionIds, setSelectedTransactionIds] = useState(
-    loadSetting('selectedTransactions', { defaultValue: new Set<string>([]) }),
-  )
+  const [fromDate, setFromDate] = useState(loadNullableDateFilter('dateRangeFrom'))
+  const [toDate, setToDate] = useState(loadNullableDateFilter('dateRangeTo'))
+  const [showTransfers, setShowTransfers] = useState(loadFilter('showTransfers', { default: true }))
+  const [selectedAccountIds, setSelectedAccountIds] = useState(loadStringSetFilter('selectedAccountIds'))
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState(loadStringSetFilter('selectedCategoryIds'))
+  const [selectedPayeeIds, setSelectedPayeeIds] = useState(loadStringSetFilter('selectedPayeeIds'))
+  const [selectedTransactionIds, setSelectedTransactionIds] = useState(loadStringSetFilter('selectedTransactions'))
 
   // Memoized
   const categoriesMap = useMemo(() => {
@@ -99,23 +97,13 @@ function Transactions(props: Props) {
   }, [props.client, budgetId, categoryGroups, accounts, payees, transactions])
 
   useEffect(() => {
-    if (fromDate) {
-      localStorage.setItem(SETTINGS_STORAGE_KEYS.dateRangeFrom, fromDate.toISOString())
-    } else {
-      localStorage.removeItem(SETTINGS_STORAGE_KEYS.dateRangeFrom)
-    }
-
-    if (toDate) {
-      localStorage.setItem(SETTINGS_STORAGE_KEYS.dateRangeTo, toDate.toISOString())
-    } else {
-      localStorage.removeItem(SETTINGS_STORAGE_KEYS.dateRangeTo)
-    }
-
-    localStorage.setItem(SETTINGS_STORAGE_KEYS.showTransfers, JSON.stringify(showTransfers))
-    localStorage.setItem(SETTINGS_STORAGE_KEYS.selectedAccountIds, JSON.stringify(Array.from(selectedAccountIds)))
-    localStorage.setItem(SETTINGS_STORAGE_KEYS.selectedCategoryIds, JSON.stringify(Array.from(selectedCategoryIds)))
-    localStorage.setItem(SETTINGS_STORAGE_KEYS.selectedPayeeIds, JSON.stringify(Array.from(selectedPayeeIds)))
-    localStorage.setItem(SETTINGS_STORAGE_KEYS.selectedTransactions, JSON.stringify(Array.from(selectedTransactionIds)))
+    saveFilter('dateRangeFrom', fromDate?.toISOString())
+    saveFilter('dateRangeTo', toDate?.toISOString())
+    saveFilter('showTransfers', showTransfers)
+    saveFilter('selectedAccountIds', Array.from(selectedAccountIds))
+    saveFilter('selectedCategoryIds', Array.from(selectedCategoryIds))
+    saveFilter('selectedPayeeIds', Array.from(selectedPayeeIds))
+    saveFilter('selectedTransactions', Array.from(selectedTransactionIds))
   }, [
     fromDate,
     toDate,
