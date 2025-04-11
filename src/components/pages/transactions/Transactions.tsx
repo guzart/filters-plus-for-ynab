@@ -9,83 +9,29 @@ import SectionTitle from '@/components/atoms/section-title/SectionTitle'
 import CheckboxList from '@/components/molecules/checkbox-list/CheckboxList'
 import TransactionsList from '@/components/molecules/transactions-list/TransactionsList'
 import type { Account, CategoryGroupWithCategories, Payee, TransactionSummary } from '@/lib/ynab-api/types'
-import { EntityStorageKeys, SETTINGS_STORAGE_KEYS, SettingStorageKeys } from '@/lib/constants'
+import { EntityStorageKeys, SETTINGS_STORAGE_KEYS } from '@/lib/constants'
+import { fetchEntities, loadSetting } from '@/lib/helpers/storage'
 
 import './Transactions.css'
 
 type Props = PropsWithoutRef<{ budgetId: string; client: Client }>
 
-interface FetchEntityProps<K extends EntityStorageKeys, T> {
-  storageKey: K
-  request: () => Promise<T>
-  setState: (state: T | null) => void
-  isLoading: Record<K, boolean>
-  setIsLoading: (isLoading: Record<K, boolean>) => void
-}
-
-function fetchEntities<K extends EntityStorageKeys, T>({
-  storageKey,
-  request,
-  setState,
-  isLoading,
-  setIsLoading,
-}: FetchEntityProps<K, T>) {
-  const storedEntity = localStorage.getItem(storageKey)
-  if (storedEntity) {
-    setState(JSON.parse(storedEntity))
-  } else if (!isLoading[storageKey]) {
-    setIsLoading({ ...isLoading, [storageKey]: true })
-    request().then((data) => {
-      setState(data)
-      localStorage.setItem(storageKey, JSON.stringify(data))
-      setIsLoading({ ...isLoading, [storageKey]: false })
-    })
-  }
-}
-
-interface LoadSettingProps<T> {
-  defaultValue: T
-}
-
-function loadSetting<T, K extends SettingStorageKeys = SettingStorageKeys>(
-  storageKey: K,
-  { defaultValue }: LoadSettingProps<T>,
-): () => T {
-  return () => {
-    const storedValue = localStorage.getItem(storageKey)
-    if (storedValue) {
-      return JSON.parse(storedValue)
-    }
-
-    return defaultValue
-  }
-}
-
 function Transactions(props: Props) {
   const { budgetId } = props
 
-  // Budget Entities
-  const [categoryGroups, setCategoryGroups] = useState(null as CategoryGroupWithCategories[] | null)
-  const [accounts, setAccounts] = useState(null as Account[] | null)
-  const [transactions, setTransactions] = useState(null as TransactionSummary[] | null)
-  const [payees, setPayees] = useState(null as Payee[] | null)
+  // Budget Entities Loading State
   const [isLoading, setIsLoading] = useState<Record<EntityStorageKeys, boolean>>({
-    categoryGroups: false,
     accounts: false,
-    transactions: false,
+    categoryGroups: false,
     payees: false,
+    transactions: false,
   })
 
-  const categoriesMap = useMemo(() => {
-    const output = new Map<string, { name: string }>()
-    categoryGroups?.forEach((group) => {
-      group.categories.forEach((category) => {
-        output.set(category.id, { name: `${category.name} (${group.name})` })
-      })
-    })
-
-    return output
-  }, [categoryGroups])
+  // Budget Entities
+  const [accounts, setAccounts] = useState(null as Account[] | null)
+  const [categoryGroups, setCategoryGroups] = useState(null as CategoryGroupWithCategories[] | null)
+  const [payees, setPayees] = useState(null as Payee[] | null)
+  const [transactions, setTransactions] = useState(null as TransactionSummary[] | null)
 
   // Filters
 
@@ -104,6 +50,18 @@ function Transactions(props: Props) {
   const [selectedTransactionIds, setSelectedTransactionIds] = useState(
     loadSetting('selectedTransactions', { defaultValue: new Set<string>([]) }),
   )
+
+  // Memoized
+  const categoriesMap = useMemo(() => {
+    const output = new Map<string, { name: string }>()
+    categoryGroups?.forEach((group) => {
+      group.categories.forEach((category) => {
+        output.set(category.id, { name: `${category.name} (${group.name})` })
+      })
+    })
+
+    return output
+  }, [categoryGroups])
 
   // Fetch budget items from server
   useEffect(() => {
