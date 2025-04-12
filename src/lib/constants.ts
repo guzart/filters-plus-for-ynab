@@ -16,6 +16,7 @@ export const FILTERS_STORAGE_KEYS = {
   selectedPayeeIds: 'fp_selectedPayeeIds',
   selectedTransactions: 'fp_selectedTransactions',
   showTransfers: 'fp_showTransfersFilter',
+  showInflows: 'fp_showInflowsFilter',
 }
 
 export const ENTITIES_STORAGE_KEYS = {

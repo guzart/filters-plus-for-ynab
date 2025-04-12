@@ -35,6 +35,7 @@ function Transactions(props: Props) {
   const [fromDate, setFromDate] = useState(loadFilter('dateRangeFrom', { default: lastYear }))
   const [toDate, setToDate] = useState(loadNullableDateFilter('dateRangeTo'))
   const [showTransfers, setShowTransfers] = useState(loadFilter('showTransfers', { default: true }))
+  const [showInflows, setShowInflows] = useState(loadFilter('showInflows', { default: true }))
   const [selectedAccountIds, setSelectedAccountIds] = useState(loadStringSetFilter('selectedAccountIds'))
   const [selectedCategoryIds, setSelectedCategoryIds] = useState(loadStringSetFilter('selectedCategoryIds'))
   const [selectedPayeeIds, setSelectedPayeeIds] = useState(loadStringSetFilter('selectedPayeeIds'))
@@ -121,6 +122,10 @@ function Transactions(props: Props) {
         return false
       }
 
+      if (!showInflows && trx.amount > 0) {
+        return false
+      }
+
       if (!selectedAccountIds.has(trx.account_id)) {
         return false
       }
@@ -135,7 +140,16 @@ function Transactions(props: Props) {
 
       return true
     })
-  }, [transactions, fromDate, toDate, showTransfers, selectedAccountIds, selectedCategoryIds, selectedPayeeIds])
+  }, [
+    transactions,
+    fromDate,
+    toDate,
+    showTransfers,
+    showInflows,
+    selectedAccountIds,
+    selectedCategoryIds,
+    selectedPayeeIds,
+  ])
 
   function handleSelectTransaction(transactionIds: string[], targetId: string) {
     const isRemove = selectedTransactionIds.has(targetId)
@@ -186,6 +200,14 @@ function Transactions(props: Props) {
               <Flex gap="2" align="center">
                 <Switch checked={showTransfers} onCheckedChange={() => setShowTransfers(!showTransfers)} />
                 Show Transfers
+              </Flex>
+            </Text>
+          </Box>
+          <Box className="mt-4 pt-2">
+            <Text as="label">
+              <Flex gap="2" align="center">
+                <Switch checked={showInflows} onCheckedChange={() => setShowInflows(!showInflows)} />
+                Show Inflows
               </Flex>
             </Text>
           </Box>
