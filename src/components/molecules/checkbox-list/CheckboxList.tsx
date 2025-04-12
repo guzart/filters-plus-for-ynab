@@ -1,8 +1,8 @@
 import { MouseEvent, PropsWithoutRef, useRef, useState } from 'react'
-import compact from 'lodash/compact'
-import './CheckboxList.css'
-import { ChevronDownIcon } from '@radix-ui/themes'
 import { Button } from '@radix-ui/themes'
+import compact from 'lodash/compact'
+
+import './CheckboxList.css'
 
 interface Item {
   id: string
