@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { Container, Link, Theme } from '@radix-ui/themes'
 
 import BudgetSelect from './components/molecules/budget-select/BudgetSelect'
@@ -9,20 +9,6 @@ import { CLIENT_ID, ACCESS_TOKEN_KEY, ACTIVE_BUDGET_ID_KEY } from './lib/constan
 
 const redirectUrl = window.location.origin + window.location.pathname
 const authorizationUrl = buildAuthorizationUrl({ clientId: CLIENT_ID, redirectUrl })
-
-interface InitializeProps {
-  accessToken: string
-  setAccessToken: (accessToken: string) => void
-  setIsInitializing: (isInitializing: boolean) => void
-}
-
-async function initialize({ accessToken, setAccessToken, setIsInitializing }: InitializeProps): Promise<Client> {
-  setAccessToken(accessToken)
-  const client = new Client(accessToken)
-  await client.getUserInfo()
-  setIsInitializing(false)
-  return client
-}
 
 function getAccessTokenFromLocationHash() {
   const hash = window.location.hash.replace('#', '')
@@ -36,56 +22,52 @@ function clearLocationHash() {
 }
 
 function App() {
-  const [isInitializing, setIsInitializing] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [accessToken, setAccessToken] = useState(null as string | null)
   const [activeBudgetId, setActiveBudgetId] = useState(null as string | null)
   const [client, setClient] = useState(null as Client | null)
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const storedToken = localStorage.getItem(ACCESS_TOKEN_KEY)
-      if (storedToken) {
-        setClient(
-          await initialize({
-            accessToken: storedToken,
-            setAccessToken,
-            setIsInitializing,
-          }),
-        )
-        return
-      }
-
-      const accessTokenParam = getAccessTokenFromLocationHash()
-      if (accessTokenParam) {
-        clearLocationHash()
-        setClient(
-          await initialize({
-            accessToken: accessTokenParam,
-            setAccessToken,
-            setIsInitializing,
-          }),
-        )
-        return
-      }
-
-      setIsInitializing(false)
+  useLayoutEffect(() => {
+    if (!isLoading) {
+      return
     }
 
-    initializeAuth()
-  }, [accessToken])
+    let accessToken: string | null = null
+
+    const accessTokenParam = getAccessTokenFromLocationHash()
+    if (accessTokenParam) {
+      accessToken = accessTokenParam
+      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+      clearLocationHash()
+    }
+
+    const storedToken = localStorage.getItem(ACCESS_TOKEN_KEY)
+    if (storedToken) {
+      accessToken = storedToken
+    }
+
+    if (accessToken) {
+      setAccessToken(accessToken)
+      setClient(new Client(accessToken))
+    }
+
+    const storedActiveBudgetId = localStorage.getItem(ACTIVE_BUDGET_ID_KEY)
+    if (storedActiveBudgetId) {
+      setActiveBudgetId(storedActiveBudgetId)
+    }
+
+    setIsLoading(false)
+  }, [])
 
   useEffect(() => {
-    const budgetId = localStorage.getItem(ACTIVE_BUDGET_ID_KEY)
-    if (budgetId) {
-      setActiveBudgetId(budgetId)
-    } else if (activeBudgetId) {
+    if (activeBudgetId) {
       localStorage.setItem(ACTIVE_BUDGET_ID_KEY, activeBudgetId)
     }
   }, [activeBudgetId])
 
   const renderContent = () => {
-    if (isInitializing) {
-      return <div>Initializing...</div>
+    if (isLoading) {
+      return <div className="flex h-screen items-center justify-center">Loading...</div>
     }
 
     if (!accessToken) {

@@ -9,7 +9,6 @@ import SectionTitle from '@/components/atoms/section-title/SectionTitle'
 import CheckboxList from '@/components/molecules/checkbox-list/CheckboxList'
 import TransactionsList from '@/components/molecules/transactions-list/TransactionsList'
 import type { Account, CategoryGroupWithCategories, Payee, TransactionSummary } from '@/lib/ynab-api/types'
-import { EntityStorageKeys } from '@/lib/constants'
 import {
   fetchEntities,
   loadFilter as loadFilter,
@@ -22,16 +21,10 @@ import './Transactions.css'
 
 type Props = PropsWithoutRef<{ budgetId: string; client: Client }>
 
+const lastYear = new Date(new Date().getFullYear() - 1, 0, 1)
+
 function Transactions(props: Props) {
   const { budgetId } = props
-
-  // Budget Entities Loading State
-  const [isLoading, setIsLoading] = useState<Record<EntityStorageKeys, boolean>>({
-    accounts: false,
-    categoryGroups: false,
-    payees: false,
-    transactions: false,
-  })
 
   // Budget Entities
   const [accounts, setAccounts] = useState(null as Account[] | null)
@@ -41,7 +34,7 @@ function Transactions(props: Props) {
 
   // Filters
 
-  const [fromDate, setFromDate] = useState(loadNullableDateFilter('dateRangeFrom'))
+  const [fromDate, setFromDate] = useState(loadFilter('dateRangeFrom', { default: lastYear }))
   const [toDate, setToDate] = useState(loadNullableDateFilter('dateRangeTo'))
   const [showTransfers, setShowTransfers] = useState(loadFilter('showTransfers', { default: true }))
   const [selectedAccountIds, setSelectedAccountIds] = useState(loadStringSetFilter('selectedAccountIds'))
@@ -63,41 +56,38 @@ function Transactions(props: Props) {
 
   // Fetch budget items from server
   useEffect(() => {
-    fetchEntities({
-      storageKey: 'categoryGroups',
-      request: () => props.client.getCategoryGroups(budgetId).then((data) => data.category_groups),
-      setState: setCategoryGroups,
-      isLoading,
-      setIsLoading,
-    })
+    if (!categoryGroups) {
+      fetchEntities('categoryGroups', {
+        request: () => props.client.getCategoryGroups(budgetId).then((data) => data.category_groups),
+        setState: setCategoryGroups,
+      })
+    }
 
-    fetchEntities({
-      storageKey: 'accounts',
-      request: () => props.client.getAccounts(budgetId).then((data) => data.accounts),
-      setState: setAccounts,
-      isLoading,
-      setIsLoading,
-    })
+    if (!accounts) {
+      fetchEntities('accounts', {
+        request: () => props.client.getAccounts(budgetId).then((data) => data.accounts),
+        setState: setAccounts,
+      })
+    }
 
-    fetchEntities({
-      storageKey: 'payees',
-      request: () => props.client.getPayees(budgetId).then((data) => data.payees),
-      setState: setPayees,
-      isLoading,
-      setIsLoading,
-    })
+    if (!payees) {
+      fetchEntities('payees', {
+        request: () => props.client.getPayees(budgetId).then((data) => data.payees),
+        setState: setPayees,
+      })
+    }
 
-    fetchEntities({
-      storageKey: 'transactions',
-      request: () => props.client.getTransactions(budgetId).then((data) => data.transactions),
-      setState: setTransactions,
-      isLoading,
-      setIsLoading,
-    })
-  }, [props.client, budgetId, categoryGroups, accounts, payees, transactions])
+    if (!transactions) {
+      fetchEntities('transactions', {
+        request: () =>
+          props.client.getTransactions(budgetId, { fromDate: fromDate || lastYear }).then((data) => data.transactions),
+        setState: setTransactions,
+      })
+    }
+  }, [props.client])
 
   useEffect(() => {
-    saveFilter('dateRangeFrom', fromDate?.toISOString())
+    saveFilter('dateRangeFrom', fromDate.toISOString())
     saveFilter('dateRangeTo', toDate?.toISOString())
     saveFilter('showTransfers', showTransfers)
     saveFilter('selectedAccountIds', Array.from(selectedAccountIds))
@@ -165,7 +155,7 @@ function Transactions(props: Props) {
   const getCategoryName = (categoryId: string) => categoriesMap.get(categoryId)?.name || categoryId
 
   if (!categoryGroups || !accounts || !payees || !transactions) {
-    return <span>Loading...</span>
+    return <div className="flex h-screen items-center justify-center">Loading...</div>
   }
 
   const selectedTransactions = transactions.filter((tr) => selectedTransactionIds.has(tr.id))
@@ -181,7 +171,7 @@ function Transactions(props: Props) {
             className="p-transactions-dateInput"
             type="date"
             value={toUTCDateString(fromDate)}
-            onChange={(ev) => setFromDate(ev.target.valueAsDate)}
+            onChange={(ev) => setFromDate(ev.target.valueAsDate || lastYear)}
           />
           <span className="mx-5 inline-block"> – </span>
           <input
