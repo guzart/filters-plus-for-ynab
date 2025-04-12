@@ -1,11 +1,9 @@
 import flatMap from 'lodash/flatMap'
 import { PropsWithoutRef, useEffect, useMemo, useState } from 'react'
-import { Box, Flex, Grid, ScrollArea, Switch, Tabs, Text } from '@radix-ui/themes'
+import { Box, Flex, ScrollArea, Switch, Tabs, Text } from '@radix-ui/themes'
 
 import { toUTCDateString } from '@/lib/helpers/format'
 import type Client from '@/lib/ynab-api/client'
-import * as cards from '@/components/atoms/card'
-import SectionTitle from '@/components/atoms/section-title/SectionTitle'
 import CheckboxList from '@/components/molecules/checkbox-list/CheckboxList'
 import TransactionsList from '@/components/molecules/transactions-list/TransactionsList'
 import type { Account, CategoryGroupWithCategories, Payee, TransactionSummary } from '@/lib/ynab-api/types'
