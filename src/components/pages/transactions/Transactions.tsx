@@ -258,8 +258,8 @@ function Transactions(props: Props) {
           </Tabs.Root>
         </Box>
       </div>
-      <div className="flex flex-1 flex-row gap-4">
-        <div className="flex max-h-full flex-col gap-4 overflow-y-hidden">
+      <div className="flex h-full flex-1 flex-row gap-4 overflow-hidden">
+        <div className="flex flex-1 flex-col gap-4">
           <h2 className="mt-4 text-2xl font-bold">
             Transactions ({selectedTransactionIds.size}/{filteredTransactions.length})
           </h2>
@@ -273,9 +273,11 @@ function Transactions(props: Props) {
             />
           </ScrollArea>
         </div>
-        <div>
+        <div className="flex flex-1 flex-col gap-4">
           <h2 className="mt-4 text-2xl font-bold">Selected Transactions ({selectedTransactions.length})</h2>
-          <TransactionsList transactions={selectedTransactions} getCategoryName={getCategoryName} />
+          <ScrollArea type="always" scrollbars="vertical">
+            <TransactionsList transactions={selectedTransactions} getCategoryName={getCategoryName} />
+          </ScrollArea>
         </div>
       </div>
     </div>

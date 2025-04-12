@@ -1,8 +1,6 @@
 @import 'tailwindcss';
 
-.m-transactionsList {
-  &-container {
-    @apply divide-y divide-gray-200;
-    user-select: none;
-  }
+.m-transactionsList-container {
+  @apply divide-y divide-gray-200;
+  user-select: none;
 }

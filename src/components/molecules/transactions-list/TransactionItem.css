@@ -1,46 +1,27 @@
 @import 'tailwindcss';
 
-.m-transactionsList-item {
-  @apply relative block;
-
-  &:hover {
-    @apply bg-gray-50;
+.m-transactionsListItem-flag {
+  &.mod-red {
+    @apply text-red-700;
   }
 
-  &.mod-selected {
-    @apply bg-green-50;
+  &.mod-orange {
+    @apply text-yellow-700;
   }
 
-  &-wrapper {
-    @apply border-l-4 border-transparent px-4 py-4;
-    @apply flex justify-between;
-
-    &.mod-red {
-      @apply border-red-700;
-    }
-
-    &.mod-orange {
-      @apply border-yellow-700;
-    }
-
-    &.mod-yellow {
-      @apply border-yellow-300;
-    }
-
-    &.mod-green {
-      @apply border-green-700;
-    }
-
-    &.mod-blue {
-      @apply border-blue-700;
-    }
-
-    &.mod-purple {
-      @apply border-purple-700;
-    }
+  &.mod-yellow {
+    @apply text-yellow-700;
   }
 
-  &-selectedIcon {
-    @apply absolute bottom-2 right-4 text-green-600;
+  &.mod-green {
+    @apply text-green-700;
+  }
+
+  &.mod-blue {
+    @apply text-blue-700;
+  }
+
+  &.mod-purple {
+    @apply text-purple-700;
   }
 }
