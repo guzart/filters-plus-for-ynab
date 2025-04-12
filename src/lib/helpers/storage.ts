@@ -40,7 +40,10 @@ export function loadFilter<T, K extends FilterStorageKeys = FilterStorageKeys>(
         return new Set(data)
       }
 
-      if (props.default && props.default instanceof Date) {
+      if (
+        (typeof data === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:/.test(data)) ||
+        (props.default && props.default instanceof Date)
+      ) {
         return new Date(data)
       }
 

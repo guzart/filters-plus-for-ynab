@@ -1,9 +1,9 @@
 import flatMap from 'lodash/flatMap'
 import { PropsWithoutRef, useEffect, useMemo, useState } from 'react'
+import { Box, Flex, Grid, ScrollArea, Switch, Tabs, Text } from '@radix-ui/themes'
 
 import { toUTCDateString } from '@/lib/helpers/format'
 import type Client from '@/lib/ynab-api/client'
-import Toggle from '@/components/atoms/toggle/Toggle'
 import * as cards from '@/components/atoms/card'
 import SectionTitle from '@/components/atoms/section-title/SectionTitle'
 import CheckboxList from '@/components/molecules/checkbox-list/CheckboxList'
@@ -162,99 +162,123 @@ function Transactions(props: Props) {
 
   // Other filters: memo, flags, amount range, payees
   return (
-    <>
-      <SectionTitle>Filters</SectionTitle>
-      <cards.Card>
-        <cards.Section>
-          <h3 className="p-transactions-filterHeading">Date Range</h3>
-          <input
-            className="p-transactions-dateInput"
-            type="date"
-            value={toUTCDateString(fromDate)}
-            onChange={(ev) => setFromDate(ev.target.valueAsDate || lastYear)}
-          />
-          <span className="mx-5 inline-block"> – </span>
-          <input
-            className="p-transactions-dateInput"
-            type="date"
-            value={toUTCDateString(toDate)}
-            onChange={(ev) => setToDate(ev.target.valueAsDate)}
-          />
-        </cards.Section>
-        <cards.Section>
-          <div className="mt-4 flex items-center">
-            <Toggle label="Show Transfer" value={showTransfers} onChange={(checked) => setShowTransfers(checked)} />
-            <h3
-              className="p-transactions-filterHeading mod-toggleLabel"
-              onClick={() => setShowTransfers(!showTransfers)}
-            >
-              Show Transfers
-            </h3>
-          </div>
-        </cards.Section>
-        <cards.Section>
-          <CheckboxList
-            id="accounts"
-            name="accounts"
-            label="Accounts"
-            items={accounts.map(({ id, name }) => ({ id, name }))}
-            className="p-transactions-checkboxList"
-            labelClassName="p-transactions-filterHeading"
-            listClassName="p-transactions-checkboxList-list"
-            value={selectedAccountIds}
-            onChange={(selection) => setSelectedAccountIds(selection.selectedIds)}
-          />
-        </cards.Section>
-        <cards.Section>
-          <CheckboxList
-            id="categories"
-            name="categories"
-            label="Categories"
-            items={flatMap(
-              categoryGroups.map((group) =>
-                group.categories.map(({ id, name }) => ({
-                  id,
-                  name: `${name} (${group.name})`,
-                })),
-              ),
-            )}
-            className="p-transactions-checkboxList"
-            labelClassName="p-transactions-filterHeading"
-            listClassName="p-transactions-checkboxList-list"
-            value={selectedCategoryIds}
-            onChange={(selection) => setSelectedCategoryIds(selection.selectedIds)}
-          />
-        </cards.Section>
-        <cards.Section>
-          <CheckboxList
-            id="payees"
-            name="payees"
-            label="Payees"
-            items={payees.map(({ id, name }) => ({ id, name }))}
-            className="p-transactions-checkboxList"
-            labelClassName="p-transactions-filterHeading"
-            listClassName="p-transactions-checkboxList-list"
-            value={selectedPayeeIds}
-            onChange={(selection) => setSelectedPayeeIds(selection.selectedIds)}
-          />
-        </cards.Section>
-      </cards.Card>
-      <SectionTitle>
-        Transactions ({selectedTransactionIds.size}/{filteredTransactions.length})
-      </SectionTitle>
-      <div className="p-transactions-window">
-        <TransactionsList
-          transactions={filteredTransactions}
-          getCategoryName={getCategoryName}
-          onSelect={handleSelectTransaction}
-          selectedTransactionIds={selectedTransactionIds}
-        />
+    <div className="flex h-screen flex-col overflow-hidden p-4">
+      <div>
+        <h2 className="text-2xl font-bold">Filters</h2>
+        <Flex gap="8">
+          <Box>
+            <h3 className="p-transactions-filterHeading">Date Range</h3>
+            <span className="mr-2 inline-block italic">From</span>
+            <input
+              className="p-transactions-dateInput"
+              type="date"
+              value={toUTCDateString(fromDate)}
+              onChange={(ev) => setFromDate(ev.target.valueAsDate || lastYear)}
+            />
+            <span className="mx-5 inline-block italic"> to </span>
+            <input
+              className="p-transactions-dateInput"
+              type="date"
+              value={toUTCDateString(toDate)}
+              onChange={(ev) => setToDate(ev.target.valueAsDate)}
+            />
+          </Box>
+          <Box className="mt-4 pt-2">
+            <Text as="label">
+              <Flex gap="2" align="center">
+                <Switch checked={showTransfers} onCheckedChange={() => setShowTransfers(!showTransfers)} />
+                Show Transfers
+              </Flex>
+            </Text>
+          </Box>
+        </Flex>
+        <Box className="mt-2">
+          <Tabs.Root defaultValue="accounts">
+            <Tabs.List>
+              <Tabs.Trigger value="accounts">
+                Accounts ({selectedAccountIds.size}/{accounts.length})
+              </Tabs.Trigger>
+              <Tabs.Trigger value="categories">
+                Categories ({selectedCategoryIds.size}/{categoryGroups.flatMap((group) => group.categories).length})
+              </Tabs.Trigger>
+              <Tabs.Trigger value="payees">
+                Payees ({selectedPayeeIds.size}/{payees.length})
+              </Tabs.Trigger>
+            </Tabs.List>
+            <ScrollArea type="always" scrollbars="vertical" style={{ height: 180 }}>
+              <Box pt="3">
+                <Tabs.Content value="accounts">
+                  <CheckboxList
+                    id="accounts"
+                    name="accounts"
+                    label="Accounts"
+                    items={accounts.map(({ id, name }) => ({ id, name }))}
+                    className="p-transactions-checkboxList"
+                    labelClassName="p-transactions-filterHeading"
+                    listClassName="p-transactions-checkboxList-list"
+                    value={selectedAccountIds}
+                    onChange={(selection) => setSelectedAccountIds(selection.selectedIds)}
+                  />
+                </Tabs.Content>
+                <Tabs.Content value="categories">
+                  <CheckboxList
+                    id="categories"
+                    name="categories"
+                    label="Categories"
+                    items={flatMap(
+                      categoryGroups.map((group) =>
+                        group.categories.map(({ id, name }) => ({
+                          id,
+                          name: `${name} (${group.name})`,
+                        })),
+                      ),
+                    )}
+                    className="p-transactions-checkboxList"
+                    labelClassName="p-transactions-filterHeading"
+                    listClassName="p-transactions-checkboxList-list"
+                    value={selectedCategoryIds}
+                    onChange={(selection) => setSelectedCategoryIds(selection.selectedIds)}
+                  />
+                </Tabs.Content>
+                <Tabs.Content value="payees">
+                  <CheckboxList
+                    id="payees"
+                    name="payees"
+                    label="Payees"
+                    items={payees.map(({ id, name }) => ({ id, name }))}
+                    className="p-transactions-checkboxList"
+                    labelClassName="p-transactions-filterHeading"
+                    listClassName="p-transactions-checkboxList-list"
+                    value={selectedPayeeIds}
+                    onChange={(selection) => setSelectedPayeeIds(selection.selectedIds)}
+                  />
+                </Tabs.Content>
+              </Box>
+            </ScrollArea>
+          </Tabs.Root>
+        </Box>
       </div>
-      <SectionTitle>Selected Transactions ({selectedTransactions.length})</SectionTitle>
-      <div className="p-transactions-window">
-        <TransactionsList transactions={selectedTransactions} getCategoryName={getCategoryName} />
+      <div className="flex flex-1 flex-row gap-4">
+        <div className="flex max-h-full flex-col gap-4 overflow-y-hidden">
+          <h2 className="mt-4 text-2xl font-bold">
+            Transactions ({selectedTransactionIds.size}/{filteredTransactions.length})
+          </h2>
+          <ScrollArea type="always" scrollbars="vertical">
+            <TransactionsList
+              className="pe-2"
+              transactions={filteredTransactions}
+              getCategoryName={getCategoryName}
+              onSelect={handleSelectTransaction}
+              selectedTransactionIds={selectedTransactionIds}
+            />
+          </ScrollArea>
+        </div>
+        <div>
+          <h2 className="mt-4 text-2xl font-bold">Selected Transactions ({selectedTransactions.length})</h2>
+          <TransactionsList transactions={selectedTransactions} getCategoryName={getCategoryName} />
+        </div>
       </div>
-    </>
+    </div>
   )
 }
 

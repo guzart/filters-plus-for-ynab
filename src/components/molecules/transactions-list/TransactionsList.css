@@ -1,8 +1,6 @@
 @import 'tailwindcss';
 
 .m-transactionsList {
-  @apply overflow-hidden rounded-md border border-gray-200 bg-white shadow;
-
   &-container {
     @apply divide-y divide-gray-200;
     user-select: none;

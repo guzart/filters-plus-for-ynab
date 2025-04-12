@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
-import { Container, Link, Theme } from '@radix-ui/themes'
+import { Link, Theme } from '@radix-ui/themes'
 
 import BudgetSelect from './components/molecules/budget-select/BudgetSelect'
 import Transactions from './components/pages/transactions/Transactions'
@@ -103,7 +103,7 @@ function App() {
 
   return (
     <Theme>
-      <Container>{renderContent()}</Container>
+      <div>{renderContent()}</div>
     </Theme>
   )
 }

@@ -1,6 +1,7 @@
 import { HTMLProps } from 'react'
-import { TransactionSummary } from '../../../lib/ynab-api/types'
-import Icon from '../../atoms/icon/Icon'
+import { CircleIcon } from '@radix-ui/react-icons'
+
+import { TransactionSummary } from '@/lib/ynab-api/types'
 import './TransactionItem.css'
 
 type Props = HTMLProps<HTMLLIElement> & {
@@ -25,18 +26,16 @@ function TransactionsListItem(props: Props) {
 
   const subsElement = trx.subtransactions.length > 0 ? <div>{JSON.stringify(trx.subtransactions)}</div> : null
 
-  const memoElement = trx.memo ? (
-    <span className="inline-block ml-3 text-sm text-gray-600">– {trx.memo}</span>
-  ) : null
+  const memoElement = trx.memo ? <span className="ml-3 inline-block text-sm text-gray-600">– {trx.memo}</span> : null
 
   const selectedElement = isSelected ? (
     <div className="m-transactionsList-item-selectedIcon">
-      <Icon name="circleCheck" />
+      <CircleIcon />
     </div>
   ) : null
 
   return (
-    <li className={`m-transactionsList-item ${modClassName}`} {...other}>
+    <li className={`m-transactionsList-item ${modClassName} p-1`} {...other}>
       <div className={`m-transactionsList-item-wrapper ${flagClassName}`}>
         <div>
           <div>
@@ -47,7 +46,7 @@ function TransactionsListItem(props: Props) {
           <div className="text-sm">{trx.account_name}</div>
           {subsElement}
         </div>
-        <div className="text-right flex-col justify-between">
+        <div className="flex-col justify-between text-right">
           <div>
             {dateFormatter.format(new Date(trx.date))}
             <br />

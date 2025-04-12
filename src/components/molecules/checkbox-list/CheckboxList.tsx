@@ -1,6 +1,8 @@
 import { MouseEvent, PropsWithoutRef, useRef, useState } from 'react'
 import compact from 'lodash/compact'
 import './CheckboxList.css'
+import { ChevronDownIcon } from '@radix-ui/themes'
+import { Button } from '@radix-ui/themes'
 
 interface Item {
   id: string
@@ -43,9 +45,7 @@ function CheckboxList(props: Props) {
         const lastTargetIndex = allInputs.indexOf(lastTarget)
         const fromIndex = Math.min(targetIndex, lastTargetIndex)
         const toIndex = Math.max(targetIndex, lastTargetIndex)
-        const rangeValues = compact(
-          allInputs.slice(fromIndex, toIndex + 1).map((input) => input.getAttribute('value')),
-        )
+        const rangeValues = compact(allInputs.slice(fromIndex, toIndex + 1).map((input) => input.getAttribute('value')))
 
         if (target.checked) {
           const selectedIds = new Set(Array.from(props.value).concat(rangeValues))
@@ -67,17 +67,22 @@ function CheckboxList(props: Props) {
 
   return (
     <div className={props.className}>
-      <div className={`m-checkboxList-label ${props.labelClassName || ''}`}>
-        {props.label}({props.value.size}/{props.items.length})
+      {/* Check all */}
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          onClick={() => props.onChange({ selectedIds: new Set(props.items.map((item) => item.id)) })}
+        >
+          Select All
+        </Button>
+        <Button variant="ghost" onClick={() => props.onChange({ selectedIds: new Set() })}>
+          Deselect All
+        </Button>
       </div>
-      <div
-        ref={refContainer}
-        className={`mt-4 space-y-4 ${props.listClassName || ''}`}
-        onClick={handleContainerClick}
-      >
+      <div ref={refContainer} className={`mt-4 space-y-4 ${props.listClassName || ''}`} onClick={handleContainerClick}>
         {props.items.map((item) => (
           <div className="relative flex items-start" key={item.id}>
-            <div className="flex items-center h-5">
+            <div className="flex h-5 items-center">
               <input
                 name={props.name}
                 id={`${props.id}-${item.id}`}
