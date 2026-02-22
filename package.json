@@ -37,5 +37,5 @@
     "test": "vitest",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,json}\""
   },
-  "packageManager": "yarn@4.9.1"
+  "packageManager": "yarn@4.12.0"
 }
