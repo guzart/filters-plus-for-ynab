@@ -4,5 +4,5 @@ interface BuildAuthorizationUrlProps {
 }
 
 export function buildAuthorizationUrl({ clientId, redirectUrl }: BuildAuthorizationUrlProps) {
-  return `https://app.ynab.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUrl}&response_type=token`
+  return `https://app.ynab.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUrl}&response_type=token&scope=read-only`
 }
