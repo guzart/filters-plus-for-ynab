@@ -9,4 +9,13 @@
       @apply ring-green-500;
     }
   }
+
+  &-search {
+    @apply rounded border-gray-300 text-gray-900;
+    @apply px-2 py-1;
+
+    &:focus {
+      @apply ring-green-500;
+    }
+  }
 }

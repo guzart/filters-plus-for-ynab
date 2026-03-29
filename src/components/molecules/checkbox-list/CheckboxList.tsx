@@ -1,4 +1,4 @@
-import { MouseEvent, PropsWithoutRef, useRef, useState } from 'react'
+import { MouseEvent, PropsWithoutRef, useMemo, useRef, useState } from 'react'
 import { Button } from '@radix-ui/themes'
 import compact from 'lodash/compact'
 
@@ -9,9 +9,11 @@ interface Item {
   name: string
 }
 
-interface Selection {
-  selectedIds: Set<string>
-}
+export type CheckboxListAction =
+  | { type: 'toggle'; id: string }
+  | { type: 'add'; ids: string[] }
+  | { type: 'remove'; ids: string[] }
+  | { type: 'set'; ids: string[] }
 
 type Props = PropsWithoutRef<{
   className?: string
@@ -23,14 +25,23 @@ type Props = PropsWithoutRef<{
   description?: string
   items: Item[]
   value: Set<string>
-  onChange: (selection: Selection) => void
+  onChange: (action: CheckboxListAction) => void
 }>
 
 function CheckboxList(props: Props) {
   const refContainer = useRef<HTMLDivElement>(null)
   const [lastTarget, setLastTarget] = useState(null as HTMLInputElement | null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const descriptionElement = props.description ? <p className="text-gray-500">{props.description}</p> : null
+
+  const searchResults = useMemo(() => {
+    if (!props.items) {
+      return []
+    }
+
+    return props.items.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  }, [props.items, searchQuery])
 
   function handleOnChange() {
     // No op. Used to make checkbox mutable
@@ -45,20 +56,15 @@ function CheckboxList(props: Props) {
         const lastTargetIndex = allInputs.indexOf(lastTarget)
         const fromIndex = Math.min(targetIndex, lastTargetIndex)
         const toIndex = Math.max(targetIndex, lastTargetIndex)
-        const rangeValues = compact(allInputs.slice(fromIndex, toIndex + 1).map((input) => input.getAttribute('value')))
+        const rangeIds = compact(allInputs.slice(fromIndex, toIndex + 1).map((input) => input.getAttribute('value')))
 
         if (target.checked) {
-          const selectedIds = new Set(Array.from(props.value).concat(rangeValues))
-          props.onChange({ selectedIds })
+          props.onChange({ type: 'add', ids: rangeIds })
         } else {
-          const rangeIds = new Set(rangeValues)
-          const selectedIds = new Set(Array.from(props.value).filter((c) => !rangeIds.has(c)))
-          props.onChange({ selectedIds })
+          props.onChange({ type: 'remove', ids: rangeIds })
         }
       } else {
-        const checkedInputs = refContainer.current.querySelectorAll('.m-checkboxList-input:checked')
-        const selectedIds = compact(Array.from(checkedInputs).map((input) => input.getAttribute('value')))
-        props.onChange({ selectedIds: new Set(selectedIds) })
+        props.onChange({ type: 'toggle', id: target.value })
       }
 
       setLastTarget(target)
@@ -71,16 +77,24 @@ function CheckboxList(props: Props) {
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
-          onClick={() => props.onChange({ selectedIds: new Set(props.items.map((item) => item.id)) })}
+          onClick={() => props.onChange({ type: 'set', ids: props.items.map((item) => item.id) })}
         >
           Select All
         </Button>
-        <Button variant="ghost" onClick={() => props.onChange({ selectedIds: new Set() })}>
+        <Button variant="ghost" onClick={() => props.onChange({ type: 'set', ids: [] })}>
           Deselect All
         </Button>
+        <div>
+          <input
+            type="search"
+            placeholder="Search by..."
+            className="m-checkboxList-search"
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </div>
       <div ref={refContainer} className={`mt-4 space-y-4 ${props.listClassName || ''}`} onClick={handleContainerClick}>
-        {props.items.map((item) => (
+        {searchResults.map((item) => (
           <div className="relative flex items-start" key={item.id}>
             <div className="flex h-5 items-center">
               <input

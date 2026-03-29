@@ -4,7 +4,7 @@ import { Box, Flex, ScrollArea, Switch, Tabs, Text } from '@radix-ui/themes'
 
 import { toUTCDateString } from '@/lib/helpers/format'
 import type Client from '@/lib/ynab-api/client'
-import CheckboxList from '@/components/molecules/checkbox-list/CheckboxList'
+import CheckboxList, { type CheckboxListAction } from '@/components/molecules/checkbox-list/CheckboxList'
 import TransactionsList from '@/components/molecules/transactions-list/TransactionsList'
 import type { Account, CategoryGroupWithCategories, Payee, TransactionSummary } from '@/lib/ynab-api/types'
 import {
@@ -164,6 +164,29 @@ function Transactions(props: Props) {
     setSelectedTransactionIds(new Set(selectedTransactionIds))
   }
 
+  function applyAction(current: Set<string>, action: CheckboxListAction): Set<string> {
+    switch (action.type) {
+      case 'toggle': {
+        const next = new Set(current)
+        if (next.has(action.id)) next.delete(action.id)
+        else next.add(action.id)
+        return next
+      }
+      case 'add': {
+        const next = new Set(current)
+        action.ids.forEach((id) => next.add(id))
+        return next
+      }
+      case 'remove': {
+        const next = new Set(current)
+        action.ids.forEach((id) => next.delete(id))
+        return next
+      }
+      case 'set':
+        return new Set(action.ids)
+    }
+  }
+
   const getCategoryName = (categoryId: string) => categoriesMap.get(categoryId)?.name || categoryId
 
   if (!categoryGroups || !accounts || !payees || !transactions) {
@@ -237,7 +260,7 @@ function Transactions(props: Props) {
                     labelClassName="p-transactions-filterHeading"
                     listClassName="p-transactions-checkboxList-list"
                     value={selectedAccountIds}
-                    onChange={(selection) => setSelectedAccountIds(selection.selectedIds)}
+                    onChange={(action) => setSelectedAccountIds(applyAction(selectedAccountIds, action))}
                   />
                 </Tabs.Content>
                 <Tabs.Content value="categories">
@@ -257,7 +280,7 @@ function Transactions(props: Props) {
                     labelClassName="p-transactions-filterHeading"
                     listClassName="p-transactions-checkboxList-list"
                     value={selectedCategoryIds}
-                    onChange={(selection) => setSelectedCategoryIds(selection.selectedIds)}
+                    onChange={(action) => setSelectedCategoryIds(applyAction(selectedCategoryIds, action))}
                   />
                 </Tabs.Content>
                 <Tabs.Content value="payees">
@@ -270,7 +293,7 @@ function Transactions(props: Props) {
                     labelClassName="p-transactions-filterHeading"
                     listClassName="p-transactions-checkboxList-list"
                     value={selectedPayeeIds}
-                    onChange={(selection) => setSelectedPayeeIds(selection.selectedIds)}
+                    onChange={(action) => setSelectedPayeeIds(applyAction(selectedPayeeIds, action))}
                   />
                 </Tabs.Content>
               </Box>
